@@ -1,0 +1,3 @@
+The files in `/conllus` all come from [the GUM corpus](http://universal.grew.fr/?corpus=UD_English-GUM@2.10), some of them subsequently edited by me.
+
+The version of Python's NLTK DRT module used here is slightly modified. At around line 690 of the file drt.py from the module, I added code causing the `get_refs` function of the class `DrtLambdaExpression` to return `[]` where it usually to raise a `NotImplementedError`. This introduces certain bugs, but my current code avoids triggering those bugs, so overall it works out. However, it is a questionable hack, and it would be much better in the future to simply write an implementation of `get_refs` for `DrtLambdaExpression`.
