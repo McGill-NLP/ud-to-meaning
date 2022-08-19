@@ -1,0 +1,9 @@
+# sent_id = GUM_textbook_labor-5
+# s_type = decl
+# transition = null
+# text = Smith offered three reasons.
+1	Smith	Smith	PROPN	NNP	Number=Sing	2	nsubj	_	Discourse=organization-preparation:15->16:5|Entity=(12-person-giv:inact-cf1-1-coref-Adam_Smith)
+2	offered	offer	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+3	three	three	NUM	CD	NumForm=Word|NumType=Card	4	nummod	_	Entity=(28-abstract-new-cf2-2-sgl
+4	reasons	reason	NOUN	NNS	Number=Plur	2	obj	_	Entity=28)|SpaceAfter=No
+5	.	.	PUNCT	.	_	2	punct	_	_

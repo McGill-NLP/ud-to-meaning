@@ -1,0 +1,21 @@
+# newdoc id = GUM_news_clock
+# global.Entity = GRP-etype-infstat-centering-minspan-link-identity
+# meta::dateCollected = 2016-09-19
+# meta::dateCreated = 2015-09-22
+# meta::dateModified = 2015-11-05
+# meta::sourceURL = https://en.wikinews.org/wiki/Texas_student_Ahmed_Mohamed_inspires_social_movement
+# meta::speakerCount = 0
+# meta::title = Texas student Ahmed Mohamed inspires social movement
+# sent_id = GUM_news_clock-1
+# s_type = decl
+# transition = establishment
+# text = Texas student Ahmed Mohamed inspires social movement
+# newpar
+# newpar_block = head rend:::"bold" (1 s)
+1	Texas	Texas	PROPN	NNP	Number=Sing	2	compound	_	Discourse=organization-heading:1->4:5|Entity=(1-person-new-cf1-2,3,4-coref(2-place-new-cf3-1-coref-Texas)
+2	student	student	NOUN	NN	Number=Sing	5	nsubj	_	_
+3	Ahmed	Ahmed	PROPN	NNP	Number=Sing	2	flat	_	_
+4	Mohamed	Mohamed	PROPN	NNP	Number=Sing	2	flat	_	Entity=1)
+5	inspires	inspire	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+6	social	social	ADJ	JJ	Degree=Pos	7	amod	_	Entity=(3-organization-new-cf2-2-coref
+7	movement	movement	NOUN	NN	Number=Sing	5	obj	_	Entity=3)

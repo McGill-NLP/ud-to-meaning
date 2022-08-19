@@ -1,0 +1,12 @@
+# sent_id = GUM_conversation_erasmus-58
+# addressee = Students
+# s_type = decl
+# speaker = Foster
+# transition = zero
+# text = The rider possesses the will.
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	Discourse=elaboration-additional:114->112:1|Entity=(112-person-new-cf2-2-coref
+2	rider	rider	NOUN	NN	Number=Sing	3	nsubj	_	Entity=112)
+3	possesses	possess	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	Entity=(6-abstract-giv:inact-cf1-2-coref
+5	will	will	NOUN	NN	Number=Sing	3	obj	_	Entity=6)|SpaceAfter=No
+6	.	.	PUNCT	.	_	3	punct	_	_

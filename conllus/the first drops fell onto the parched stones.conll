@@ -1,0 +1,15 @@
+# sent_id = GUM_fiction_garden-2-modified-modified
+# s_type = decl
+# transition = null
+# text = The first drops fell onto the parched stones.
+# newpar
+# newpar_block = p (2 s)
+1	The	the	DET	DT	Definite=Def|PronType=Art	3	det	_	Discourse=ROOT:3:0|Entity=(3-object-new-cf1-3-coref
+2	first	first	ADJ	JJ	Degree=Pos|NumType=Ord	3	amod	_	_
+3	drops	drop	NOUN	NNS	Number=Plur	6	nsubj	_	_
+6	fell	fall	VERB	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+7	onto	onto	ADP	IN	_	10	case	_	_
+8	the	the	DET	DT	Definite=Def|PronType=Art	10	det	_	Entity=(5-object-new-cf2-3-sgl
+9	parched	parched	ADJ	JJ	Degree=Pos	10	amod	_	_
+10	stones	stone	NOUN	NNS	Number=Plur	6	obl	_	Entity=5)
+11	.	.	PUNCT	.	_	6	punct	_	_

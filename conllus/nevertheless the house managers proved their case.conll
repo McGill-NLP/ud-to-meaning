@@ -1,0 +1,16 @@
+# sent_id = GUM_speech_impeachment-48
+# s_type = decl
+# speaker = StenyHoyer
+# transition = zero
+# text = Nevertheless, the House managers proved their case.
+# newpar
+# newpar_block = p (4 s)
+1	Nevertheless	nevertheless	ADV	RB	Degree=Pos	6	advmod	_	Discourse=joint-other_m:145->53:5|SpaceAfter=No
+2	,	,	PUNCT	,	_	1	punct	_	_
+3	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	Entity=(116-person-giv:inact-cf1-3-coref
+4	House	House	PROPN	NNP	Number=Sing	5	compound	_	Entity=(45-organization-giv:inact-cf3-1-coref-United_States_House_of_Representatives)
+5	managers	manager	NOUN	NNS	Number=Plur	6	nsubj	_	Entity=116)
+6	proved	prove	VERB	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+7	their	their	PRON	PRP$	Number=Plur|Person=3|Poss=Yes|PronType=Prs	8	nmod:poss	_	Entity=(104-abstract-giv:inact-cf2-2-coref(116-person-giv:act-cf1-1-ana)
+8	case	case	NOUN	NN	Number=Sing	6	obj	_	Entity=104)|SpaceAfter=No
+9	.	.	PUNCT	.	_	6	punct	_	_

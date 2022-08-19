@@ -1,0 +1,15 @@
+# sent_id = GUM_conversation_atoms-79
+# addressee = Aud,Many
+# s_type = other
+# speaker = Phil
+# transition = null
+# text = Two balloons going into the little container here.
+1	Two	two	NUM	CD	NumForm=Word|NumType=Card	2	nummod	_	Discourse=elaboration-additional:117->112:1|Entity=(62-object-giv:inact-cf1-2-coref
+2	balloons	balloon	NOUN	NNS	Number=Plur	3	nsubj	_	Entity=62)
+3	going	go	VERB	VBG	VerbForm=Ger	0	root	_	_
+4	into	into	ADP	IN	_	7	case	_	_
+5	the	the	DET	DT	Definite=Def|PronType=Art	7	det	_	Entity=(60-object-giv:inact-cf2-3-coref
+6	little	little	ADJ	JJ	Degree=Pos	7	amod	_	_
+7	container	container	NOUN	NN	Number=Sing	3	obl	_	_
+8	here	here	ADV	RB	PronType=Dem	7	advmod	_	Entity=60)|SpaceAfter=No
+9	.	.	PUNCT	.	_	3	punct	_	_

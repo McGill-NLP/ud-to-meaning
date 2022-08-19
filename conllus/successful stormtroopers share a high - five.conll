@@ -1,0 +1,14 @@
+# sent_id = GUM_news_expo-32
+# s_type = decl
+# transition = null
+# text = Successful Stormtroopers share a high-five.
+# newpar
+# newpar_block = figure rend:::"Successful Stormtroopers share a high-five." (2 s) | caption (2 s)
+1	Successful	successful	ADJ	JJ	Degree=Pos	2	amod	_	Discourse=joint-other_m:55->49:1|Entity=(122-person-new-cf1-2-sgl
+2	Stormtroopers	stormtrooper	NOUN	NNS	Number=Plur	3	nsubj	_	Entity=122)
+3	share	share	VERB	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	Entity=(123-abstract-new-cf2-4-sgl
+5	high	high	ADJ	JJ	Degree=Pos	7	amod	_	SpaceAfter=No|XML=<w>
+6	-	-	PUNCT	HYPH	_	5	punct	_	SpaceAfter=No
+7	five	five	NOUN	NN	Number=Sing	3	obj	_	Entity=123)|SpaceAfter=No|XML=</w>
+8	.	.	PUNCT	.	_	3	punct	_	_

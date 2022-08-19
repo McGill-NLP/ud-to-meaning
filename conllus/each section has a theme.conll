@@ -1,0 +1,10 @@
+# sent_id = GUM_news_lanterns-11
+# s_type = decl
+# transition = null
+# text = Each section has a theme.
+1	Each	each	DET	DT	PronType=Tot	2	det	_	Discourse=elaboration-additional:23->21:1|Entity=(51-place-new-cf1-2-sgl
+2	section	section	NOUN	NN	Number=Sing	3	nsubj	_	Entity=51)
+3	has	have	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	a	a	DET	DT	Definite=Ind|PronType=Art	5	det	_	Entity=(52-abstract-new-cf2-2-sgl
+5	theme	theme	NOUN	NN	Number=Sing	3	obj	_	Entity=52)|SpaceAfter=No
+6	.	.	PUNCT	.	_	3	punct	_	_

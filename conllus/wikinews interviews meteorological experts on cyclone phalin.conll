@@ -1,0 +1,21 @@
+# newdoc id = GUM_interview_cyclone
+# global.Entity = GRP-etype-infstat-centering-minspan-link-identity
+# meta::dateCollected = 2015-09-21
+# meta::dateCreated = 2013-10-14
+# meta::dateModified = 2015-01-01
+# meta::sourceURL = https://en.wikinews.org/wiki/Wikinews_interviews_meteorological_experts_on_Cyclone_Phalin
+# meta::speakerCount = 8
+# meta::title = Wikinews interviews meteorological experts on Cyclone Phalin
+# sent_id = GUM_interview_cyclone-1
+# s_type = decl
+# transition = establishment
+# text = Wikinews interviews meteorological experts on Cyclone Phalin
+# newpar
+# newpar_block = head rend:::"bold" (1 s)
+1	Wikinews	Wikinews	PROPN	NNP	Number=Sing	2	nsubj	_	Discourse=organization-heading:1->9:5|Entity=(1-organization-new-cf1-1-sgl-Wikinews)
+2	interviews	interview	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+3	meteorological	meteorological	ADJ	JJ	Degree=Pos	4	amod	_	Entity=(2-person-new-cf2-2-sgl
+4	experts	expert	NOUN	NNS	Number=Plur	2	obj	_	Entity=2)
+5	on	on	ADP	IN	_	6	case	_	_
+6	Cyclone	Cyclone	PROPN	NNP	Number=Sing	2	obl	_	Entity=(3-event-new-cf3-1,2-coref-Cyclone_Phailin
+7	Phalin	Phalin	PROPN	NNP	Number=Sing	6	flat	_	Entity=3)
