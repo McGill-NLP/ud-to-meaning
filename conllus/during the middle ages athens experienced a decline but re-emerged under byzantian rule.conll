@@ -1,0 +1,20 @@
+# sent_id = GUM_voyage_athens-11
+# s_type = decl
+# transition = zero
+# text = During the Middle Ages, Athens experienced a decline, but re-emerged under Byzantian rule.
+1	During	during	ADP	IN	_	4	case	_	Discourse=joint-sequence_m:25->7:1
+2	the	the	DET	DT	Definite=Def|PronType=Art	4	det	_	Entity=(36-time-new-cf3-2,3-sgl-Middle_Ages|XML=<date notBefore:::"0400-01-01" notAfter:::"1499-12-31">
+3	Middle	Middle	PROPN	NNP	Number=Sing	4	compound	_	_
+4	Ages	Age	PROPN	NNPS	Number=Plur	7	obl	_	Entity=36)|SpaceAfter=No|XML=</date>
+5	,	,	PUNCT	,	_	4	punct	_	_
+6	Athens	Athens	PROPN	NNP	Number=Sing	7	nsubj	_	Entity=(1-place-giv:inact-cf1-1-coref-Athens)
+7	experienced	experience	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+8	a	a	DET	DT	Definite=Ind|PronType=Art	9	det	_	Entity=(37-abstract-new-cf2-2-sgl
+9	decline	decline	NOUN	NN	Number=Sing	7	obj	_	Entity=37)|SpaceAfter=No
+10	,	,	PUNCT	,	_	12	punct	_	_
+11	but	but	CCONJ	CC	_	12	cc	_	Discourse=adversative-contrast_m:26->25:0
+12	re-emerged	re-emerge	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	7	conj	_	_
+13	under	under	ADP	IN	_	15	case	_	_
+14	Byzantian	Byzantian	ADJ	JJ	Degree=Pos	15	amod	_	Entity=(38-abstract-new-cf4-2-sgl
+15	rule	rule	NOUN	NN	Number=Sing	12	obl	_	Entity=38)|SpaceAfter=No
+16	.	.	PUNCT	.	_	7	punct	_	_

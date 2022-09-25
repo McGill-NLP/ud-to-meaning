@@ -491,12 +491,32 @@ with open("ending inflation means freeing all americans from the terror of runaw
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
 
-# coordinate structures and csubj (and null "mark" and "cop")
+# coordinate structures with nouns
+with open("most iodine in food comes from seafood milk and iodized salt.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# coordinate structures with nouns and adjectives
+with open("fraud and corruption prevent a fair and proper expression of the public voice.conll") as f:
+    testcollu = f.read()
+print_sentence_and_parse(testconllu)
+
+# coordinate structures with verb phrases
+with open("during the middle ages athens experienced a decline but re-emerged under byzantian rule.conll") as f:
+    testcollu = f.read()
+print_sentence_and_parse(testconllu)
+
+# csubj and coordinate structures with adjectives (and null "mark" and "cop")
 with open("to continue this long trend is to guarantee tremendous social, cultural, political, and economic upheavals.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
 
-# coordinate structures and csubj
+# coordinate structures with mismatched syntax
+with open("byron met and formed a close friendship with the younger john edleston.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# csubj and coordinate structures with mismatched syntax
 with open("practicing cultural relativism requires an open mind and a willingness to consider and even adapt to new values and norms.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)

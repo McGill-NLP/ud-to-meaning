@@ -1,0 +1,21 @@
+# sent_id = GUM_bio_emperor-31
+# s_type = decl
+# transition = zero
+# text = ... fraud and corruption prevent a fair and proper expression of the public voice;
+# newpar
+# newpar_block = p (3 s) | quote (3 s)
+1	...	…	PUNCT	:	_	5	punct	_	Discourse=elaboration-additional:71->68:2
+2	fraud	fraud	NOUN	NN	Number=Sing	5	nsubj	_	Entity=(115-abstract-new-cf1-1-sgl)
+3	and	and	CCONJ	CC	_	4	cc	_	_
+4	corruption	corruption	NOUN	NN	Number=Sing	2	conj	_	Entity=(116-abstract-new-cf4-1-sgl)
+5	prevent	prevent	VERB	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+6	a	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	Entity=(117-abstract-new-cf2-5-sgl
+7	fair	fair	ADJ	JJ	Degree=Pos	10	amod	_	_
+8	and	and	CCONJ	CC	_	9	cc	_	_
+9	proper	proper	ADJ	JJ	Degree=Pos	7	conj	_	_
+10	expression	expression	NOUN	NN	Number=Sing	5	obj	_	_
+11	of	of	ADP	IN	_	14	case	_	_
+12	the	the	DET	DT	Definite=Def|PronType=Art	14	det	_	Entity=(118-abstract-new-cf3-3-sgl
+13	public	public	ADJ	JJ	Degree=Pos	14	amod	_	_
+14	voice	voice	NOUN	NN	Number=Sing	10	nmod	_	Entity=118)117)|SpaceAfter=No
+15	;	;	PUNCT	:	_	5	punct	_	_

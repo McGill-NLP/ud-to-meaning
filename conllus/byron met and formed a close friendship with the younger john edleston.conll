@@ -1,0 +1,21 @@
+﻿# sent_id = GUM_bio_byron-18_modified
+# s_type = decl
+# transition = null
+# text = The following autumn, he went up to Trinity College, Cambridge, [24] where he met and formed a close friendship with the younger John Edleston.
+# newpar = 
+# newpar_block = p (6 s)
+# sentenceText = Byron met and formed a close friendship with the younger John Edleston .
+1	Byron	he	PROPN	NNP	Number=Sing	2	nsubj	_	_
+2	met	meet	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+3	and	and	CCONJ	CC	_	4	cc	_	_
+4	formed	form	VERB	VBD	Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin	2	conj	_	_
+5	a	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	Entity=(89-abstract-new-cf3-3-coref
+6	close	close	ADJ	JJ	Degree=Pos	7	amod	_	_
+7	friendship	friendship	NOUN	NN	Number=Sing	4	obj	_	Entity=89)
+8	with	with	ADP	IN	_	11	case	_	_
+9	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	Entity=(90-person-new-cf4-3,4-coref
+10	younger	young	ADJ	JJR	Degree=Cmp	11	amod	_	_
+11	John	John	PROPN	NNP	Number=Sing	7	nmod	_	_
+12	Edleston	Edleston	PROPN	NNP	Number=Sing	11	flat	_	Entity=90)|SpaceAfter=No
+13	.	.	PUNCT	.	_	2	punct	_	_
+
