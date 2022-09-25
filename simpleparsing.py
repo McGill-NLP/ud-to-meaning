@@ -208,6 +208,8 @@ relmeanings = {
     "advmod":DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'),
     "obl":DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'),
     "case":DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))'),
+    "ccomp":DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'),
+    "csubj":DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'),
     "root":DrtExpression.fromstring(r'\F.F((\x.([],[])))'),
 }
 
@@ -251,7 +253,7 @@ postypes = {
     "VERB":SemType.fromstring('((st)t)'),
     "PUNCT":SemType.fromstring('t'),
     "ADP":SemType.fromstring('(e(ut))'),
-    "DET":SemType.fromstring('((et)((et)t))')
+    "DET":SemType.fromstring('((et)((et)t))'),
 }
 reltypes = {
     "nsubj":CompositeType(SemType.fromstring('((st)t)'),
@@ -277,7 +279,13 @@ reltypes = {
     "case":CompositeType(SemType.fromstring('((et)t)'),
             CompositeType(SemType.fromstring('(e(ut))'),
             SemType.fromstring('(ut)'))),
-    "root":SemType.fromstring('(t(((st)t)t))')
+    "ccomp":CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('?'),
+            SemType.fromstring('((st)t)'))),
+    "csubj":CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('?'),
+            SemType.fromstring('((st)t)'))),
+    "root":SemType.fromstring('(t(((st)t)t))'),
 }
 
 # This function takes a Token as input
@@ -483,6 +491,7 @@ print_sentence_and_parse(testconllu)
 
 
 # ccomp relation
+# TODO note that the answer does not simplify because of the band-aid on the DRT module
 with open("conllus\\the authors say the results confirm the existence of inadequate iodine intake in the australian population.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
