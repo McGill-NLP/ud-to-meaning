@@ -308,6 +308,8 @@ def add_type(t):
 # start is any type of thing, but usually a SemType
 # end is any type of thing, but usually a SemType
 # iopairs is a list of tuples of things of the same type as start and end
+# comp_func is an optional argument. It is a function that takes two things of the types of start and end,
+#             and returns a boolean which should be taken to express whether those are equal.
 # The function returns a list of lists;
 # each list in the returned list contains an ordering of the numbers 0 through len(iopairs)-1
 # such that if you order iopairs in this order,
@@ -317,16 +319,16 @@ def add_type(t):
 # Like a valid Domino train.
 # The function finds all possible such orderings (which might be 0) through depth-first search.
 # This is used to find a correct order of composition for a Token's dependents.
-def semtypebinarizations(start, end, iopairs):
+def semtypebinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
     binarizations = []
     if len(iopairs)==1:
-        if iopairs[0][0]== start and iopairs[0][1]==end:
+        if comp_func(iopairs[0][0],start) and comp_func(iopairs[0][1],end):
             binarizations.append([0])
     else:
         for i in range(len(iopairs)):
             pair = iopairs[i]
-            if pair[0]==start:
-                tails = semtypebinarizations(pair[1],end,iopairs[:i]+iopairs[i+1:])
+            if comp_func(pair[0],start):
+                tails = semtypebinarizations(pair[1],end,iopairs[:i]+iopairs[i+1:],comp_func)
                 for tail in tails:
                     for j in range(len(tail)):
                         if tail[j] >= i:
