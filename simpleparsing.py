@@ -250,7 +250,7 @@ postypes = {
     "PROPN":SemType.fromstring('(et)'),
     "VERB":SemType.fromstring('((st)t)'),
     "PUNCT":SemType.fromstring('t'),
-    "ADP":SemType.fromstring('(e(st))'),
+    "ADP":SemType.fromstring('(e(ut))'),
     "DET":SemType.fromstring('((et)((et)t))')
 }
 reltypes = {
@@ -271,12 +271,12 @@ reltypes = {
     "advmod":CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('(st)'),
             SemType.fromstring('((st)t)'))),
-    "obl":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('(st)'),
-            SemType.fromstring('((st)t)'))),
+    "obl":CompositeType(SemType.fromstring('((ut)t)'),
+            CompositeType(SemType.fromstring('(ut)'),
+            SemType.fromstring('((ut)t)'))),
     "case":CompositeType(SemType.fromstring('((et)t)'),
-            CompositeType(SemType.fromstring('(e(st))'),
-            SemType.fromstring('(st)'))),
+            CompositeType(SemType.fromstring('(e(ut))'),
+            SemType.fromstring('(ut)'))),
     "root":SemType.fromstring('(t(((st)t)t))')
 }
 
@@ -364,7 +364,7 @@ def simplifynodetyped(treenode):
             if 'rel_type' in child.token.keys() and 'word_type' in child.token.keys():
                 iopairs.append((child.token['rel_type'].get_left(),child.token['rel_type'].get_right().get_right()))
                 usefulchildren.append(child)
-        binarizations = semtypebinarizations(starttype,endtype,iopairs)
+        binarizations = semtypebinarizations(starttype,endtype,iopairs,comp_func = lambda x,y:x.like(y))
         # Binarizations tell you which dependents to combine first.
         if binarizations:
             # TODO Change binarization code to allow for multiple binarizations.
