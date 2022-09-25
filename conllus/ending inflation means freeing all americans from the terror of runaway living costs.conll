@@ -1,0 +1,19 @@
+# sent_id = GUM_speech_inauguration-36
+# s_type = decl
+# speaker = RonaldReagan
+# transition = continue
+# text = Ending inflation means freeing all Americans from the terror of runaway living costs.
+1	Ending	end	VERB	VBG	VerbForm=Ger	3	csubj	_	Discourse=joint-list_m:99->98:0
+2	inflation	inflation	NOUN	NN	Number=Sing	1	obj	_	Entity=(132-abstract-new-cf2-1-sgl)
+3	means	mean	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	freeing	free	VERB	VBG	VerbForm=Ger	3	ccomp	_	_
+5	all	all	DET	DT	PronType=Tot	6	det	_	Entity=(9-person-giv:act-cf1*-2-coref-Americans
+6	Americans	American	PROPN	NNPS	Number=Plur	4	obj	_	Entity=9)
+7	from	from	ADP	IN	_	9	case	_	_
+8	the	the	DET	DT	Definite=Def|PronType=Art	9	det	_	Entity=(133-abstract-new-cf3-2-sgl
+9	terror	terror	NOUN	NN	Number=Sing	4	obl	_	_
+10	of	of	ADP	IN	_	13	case	_	_
+11	runaway	runaway	ADJ	JJ	Degree=Pos	13	amod	_	Entity=(134-abstract-new-cf4-3-sgl
+12	living	living	NOUN	NN	Number=Sing	13	compound	_	_
+13	costs	cost	NOUN	NNS	Number=Plur	9	nmod	_	Entity=134)133)|SpaceAfter=No
+14	.	.	PUNCT	.	_	3	punct	_	_

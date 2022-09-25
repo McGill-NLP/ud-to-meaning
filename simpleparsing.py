@@ -263,7 +263,7 @@ reltypes = {
     "amod":CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
     "nummod":CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
     "nmod":CompositeType(SemType.fromstring('(et)'),
-            CompositeType(SemType.fromstring('(st)'),
+            CompositeType(SemType.fromstring('(et)'),
             SemType.fromstring('(et)'))),
     "det": CompositeType(SemType.fromstring('(et)'),
             CompositeType(SemType.fromstring('((et)((et)t))'),
@@ -271,9 +271,9 @@ reltypes = {
     "advmod":CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('(st)'),
             SemType.fromstring('((st)t)'))),
-    "obl":CompositeType(SemType.fromstring('((ut)t)'),
-            CompositeType(SemType.fromstring('(ut)'),
-            SemType.fromstring('((ut)t)'))),
+    "obl":CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('(st)'),
+            SemType.fromstring('((st)t)'))),
     "case":CompositeType(SemType.fromstring('((et)t)'),
             CompositeType(SemType.fromstring('(e(ut))'),
             SemType.fromstring('(ut)'))),
@@ -381,7 +381,7 @@ def simplifynodetyped(treenode):
     # If the word has children and is an incompatible type,
     # the binarization will catch it.
     # but if it has no children, we still want the type to be right.
-    if treenode.token['word_type'] != treenode.token['rel_type'].get_right().get_left():
+    if not treenode.token['word_type'].like(treenode.token['rel_type'].get_right().get_left()):
         print("The word type {} at the word with ID {} is incompatible with rel type {}".format(
             str(treenode.token['word_type']),str(treenode.token['id']),str(treenode.token['rel_type'])))
     # Root only takes one argument, and after we use it, we trash the relation.
@@ -478,5 +478,25 @@ print_sentence_and_parse(testconllu)
 
 # flat and compound constructions, with special case for proper nouns
 with open("conllus\\texas student ahmed mohamed inspires social movement.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# ccomp relation
+with open("conllus\\the authors say the results confirm the existence of inadequate iodine intake in the australian population.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# csubj and ccomp
+with open("ending inflation means freeing all americans from the terror of runaway living costs.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# coordinate structures and csubj (and null "mark" and "cop")
+with open("to continue this long trend is to guarantee tremendous social, cultural, political, and economic upheavals.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# coordinate structures and csubj
+with open("practicing cultural relativism requires an open mind and a willingness to consider and even adapt to new values and norms.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)

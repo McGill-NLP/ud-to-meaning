@@ -1,0 +1,24 @@
+# sent_id = GUM_speech_inauguration-16
+# s_type = decl
+# speaker = RonaldReagan
+# transition = zero
+# text = To continue this long trend is to guarantee tremendous social, cultural, political, and economic upheavals.
+1	To	to	PART	TO	_	2	mark	_	Discourse=evaluation-comment:40->38:2
+2	continue	continue	VERB	VB	VerbForm=Inf	8	csubj	_	_
+3	this	this	DET	DT	Number=Sing|PronType=Dem	5	det	_	Entity=(70-abstract-new-cf1-3-sgl
+4	long	long	ADJ	JJ	Degree=Pos	5	amod	_	_
+5	trend	trend	NOUN	NN	Number=Sing	2	obj	_	Entity=70)
+6	is	be	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	cop	_	_
+7	to	to	PART	TO	_	8	mark	_	_
+8	guarantee	guarantee	VERB	VB	VerbForm=Inf	0	root	_	_
+9	tremendous	tremendous	ADJ	JJ	Degree=Pos	18	amod	_	Entity=(71-event-new-cf2-10-sgl
+10	social	social	ADJ	JJ	Degree=Pos	18	amod	_	SpaceAfter=No
+11	,	,	PUNCT	,	_	12	punct	_	_
+12	cultural	cultural	ADJ	JJ	Degree=Pos	10	conj	_	SpaceAfter=No
+13	,	,	PUNCT	,	_	14	punct	_	_
+14	political	political	ADJ	JJ	Degree=Pos	10	conj	_	SpaceAfter=No
+15	,	,	PUNCT	,	_	17	punct	_	_
+16	and	and	CCONJ	CC	_	17	cc	_	_
+17	economic	economic	ADJ	JJ	Degree=Pos	10	conj	_	_
+18	upheavals	upheaval	NOUN	NNS	Number=Plur	8	obj	_	Entity=71)|SpaceAfter=No
+19	.	.	PUNCT	.	_	8	punct	_	_

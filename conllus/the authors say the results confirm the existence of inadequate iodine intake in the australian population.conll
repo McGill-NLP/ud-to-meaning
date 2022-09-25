@@ -1,0 +1,23 @@
+# sent_id = GUM_news_iodine-11
+# s_type = decl
+# transition = smooth-shift
+# text = The authors say the results confirm the existence of inadequate iodine intake in the Australian population.
+# newpar
+# newpar_block = p (3 s)
+1	The	the	DET	DT	Definite=Def|PronType=Art	2	det	_	Discourse=attribution-positive:27->28:0|Entity=(8-person-giv:inact-cf2-2-coref
+2	authors	author	NOUN	NNS	Number=Plur	3	nsubj	_	Entity=8)
+3	say	say	VERB	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	Discourse=explanation-justify:28->29:0|Entity=(16-abstract-giv:inact-cf3-2-coref
+5	results	result	NOUN	NNS	Number=Plur	6	nsubj	_	Entity=16)
+6	confirm	confirm	VERB	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	3	ccomp	_	_
+7	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	Entity=(41-abstract-new-cf4-2-coref
+8	existence	existence	NOUN	NN	Number=Sing	6	obj	_	_
+9	of	of	ADP	IN	_	12	case	_	_
+10	inadequate	inadequate	ADJ	JJ	Degree=Pos	12	amod	_	Entity=(42-abstract-new-cf6-3-sgl
+11	iodine	iodine	NOUN	NN	Number=Sing	12	compound	_	Entity=(3-substance-giv:act-cf1*-1-coref-Iodine)
+12	intake	intake	NOUN	NN	Number=Sing	8	nmod	_	_
+13	in	in	ADP	IN	_	16	case	_	_
+14	the	the	DET	DT	Definite=Def|PronType=Art	16	det	_	Entity=(43-person-new-cf5-3-sgl
+15	Australian	Australian	ADJ	JJ	Degree=Pos	16	amod	_	_
+16	population	population	NOUN	NN	Number=Sing	12	nmod	_	Entity=43)42)41)|SpaceAfter=No
+17	.	.	PUNCT	.	_	3	punct	_	_

@@ -1,0 +1,27 @@
+# sent_id = GUM_textbook_sociology-45
+# s_type = decl
+# transition = continue
+# text = Practicing cultural relativism requires an open mind and a willingness to consider, and even adapt to, new values and norms.
+1	Practicing	practice	VERB	VBG	VerbForm=Ger	4	csubj	_	Discourse=elaboration-additional:115->112:2
+2	cultural	cultural	ADJ	JJ	Degree=Pos	3	amod	_	Entity=(2-abstract-giv:act-cf1*-2-coref
+3	relativism	relativism	NOUN	NN	Number=Sing	1	obj	_	Entity=2)
+4	requires	require	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+5	an	a	DET	DT	Definite=Ind|PronType=Art	7	det	_	Entity=(201-abstract-new-cf2-3-sgl
+6	open	open	ADJ	JJ	Degree=Pos	7	amod	_	_
+7	mind	mind	NOUN	NN	Number=Sing	4	obj	_	Entity=201)
+8	and	and	CCONJ	CC	_	10	cc	_	_
+9	a	a	DET	DT	Definite=Ind|PronType=Art	10	det	_	Entity=(202-abstract-new-cf4-2-sgl
+10	willingness	willingness	NOUN	NN	Number=Sing	7	conj	_	_
+11	to	to	PART	TO	_	12	mark	_	Discourse=purpose-attribute:116->115:0
+12	consider	consider	VERB	VB	VerbForm=Inf	10	acl	_	SpaceAfter=No
+13	,	,	PUNCT	,	_	16	punct	_	_
+14	and	and	CCONJ	CC	_	16	cc	_	_
+15	even	even	ADV	RB	_	16	advmod	_	_
+16	adapt	adapt	VERB	VB	VerbForm=Inf	12	conj	_	_
+17	to	to	ADP	IN	_	16	obl	_	SpaceAfter=No
+18	,	,	PUNCT	,	_	20	punct	_	_
+19	new	new	ADJ	JJ	Degree=Pos	20	amod	_	Entity=(203-abstract-new-cf3-2-sgl
+20	values	value	NOUN	NNS	Number=Plur	12	obj	_	Entity=203)
+21	and	and	CCONJ	CC	_	22	cc	_	_
+22	norms	norm	NOUN	NNS	Number=Plur	20	conj	_	Entity=(204-abstract-new-cf5-1-sgl)202)|SpaceAfter=No
+23	.	.	PUNCT	.	_	4	punct	_	_
