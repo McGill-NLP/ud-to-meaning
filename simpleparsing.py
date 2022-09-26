@@ -247,6 +247,30 @@ def add_denotation(t):
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
 
+# TODO add comment explaining this
+# den1 and den2 are two denotations, and semtype is of course their semantic type.
+def compute_conj(den1, den2, semtype):
+    # There's a special proviso for semantic types ((et)t) and ((st)t)
+    if semtype.like(SemType.fromstring('((ut)t)')):
+        conjden = DrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[partof(y,x)]))) + G((\y.([],[partof(y,x)]))))')
+        return conjden(den1)(den2).simplify()
+    # Deal with atomic types first
+    if semtype == SemType.fromstring('t'):
+        return den1 + den2
+    elif semtype.is_atomic():
+        return DrtExpression.fromstring(str(den1)+"-and-"+str(den2))
+    # Now we will need.... some kind of recursion. But how?
+    return den1
+
+myden1 = DrtExpression.fromstring(r'\x.([],[big(x)])')
+myden2 = DrtExpression.fromstring(r'\x.([],[blue(x)])')
+mysemtype = SemType.fromstring('(et)')
+
+# The ((ut)t) thing works!!
+yourden1 = DrtExpression.fromstring(r'\H.(([x],[big(x)]) + H(x))')
+yourden2 = DrtExpression.fromstring(r'\H.(([x],[blue(x)]) + H(x))')
+yoursemtype = SemType.fromstring('((et)t)')
+
 # MARK all the word and relation semantic types.
 
 postypes = {
@@ -391,11 +415,25 @@ def simplifynodetyped(treenode):
                 child = usefulchildren[i]
                 # TODO The next line is a hack; really should fix the DrtExpression code directly.
                 child.token['word_den'] = child.token['word_den'].replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True)
-                treenode.token['word_den'] = child.token['rel_den'](treenode.token['word_den'])(child.token['word_den']).simplify()
+                # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
+                if child.token['deprel'] == 'conj':
+                    print("got one!")
+                    print(child.token['rel_type'])
+                    treenode.token['word_den'] = compute_conj(treenode.token['word_den'],child.token['word_den'],child.token['word_type'])
+                else:
+                    treenode.token['word_den'] = child.token['rel_den'](treenode.token['word_den'])(child.token['word_den']).simplify()
                 treenode.token['word_type'] = child.token['rel_type'].get_right().get_right()
         elif iopairs:
             print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
         treenode.children = []
+    # If the node is one that's conjoined to another node,
+    # we want the "conj" type to enforce that the other node has the same semantic type,
+    # so we have to update its semantic type after simplifying this node.
+    # It will change the "conj" from "(?(??))" to replace all the ?'s with the type of this node.
+    if treenode.token['deprel'] == 'conj':
+        treenode.token['rel_type'] = CompositeType(treenode.token['word_type'],
+                                        CompositeType(treenode.token['word_type'],
+                                        treenode.token['word_type']))
     # If the word has children and is an incompatible type,
     # the binarization will catch it.
     # but if it has no children, we still want the type to be right.
@@ -514,7 +552,7 @@ print_sentence_and_parse(testconllu)
 
 
 # coordinate structures with nouns
-with open("conllus\\most iodine in food comes from seafood milk and iodized salt.conll") as f:
+with open("conllus\\most iodine in food comes from seafood milk and salt.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
 

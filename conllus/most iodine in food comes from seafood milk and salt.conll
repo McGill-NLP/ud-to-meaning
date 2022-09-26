@@ -1,0 +1,16 @@
+# sent_id = GUM_news_iodine-13
+# s_type = decl
+# transition = zero
+# text = Most iodine in food comes from seafood, milk and iodised salt.
+1	Most	most	ADJ	JJS	Degree=Sup	2	amod	_	Bridge=3<46|Discourse=context-background:30->3:7|Entity=(46-substance-acc:inf-cf3-2-sgl
+2	iodine	iodine	NOUN	NN	Number=Sing	5	nsubj	_	Entity=(3-substance-giv:inact-cf1-1-coref-Iodine)
+3	in	in	ADP	IN	_	4	case	_	_
+4	food	food	NOUN	NN	Number=Sing	2	nmod	_	Entity=(47-substance-new-cf6-1-coref)46)
+5	comes	come	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+6	from	from	ADP	IN	_	7	case	_	_
+7	seafood	seafood	NOUN	NN	Number=Sing	5	obl	_	Bridge=47<48|Entity=(48-substance-acc:inf-cf4-1-sgl)|SpaceAfter=No
+8	,	,	PUNCT	,	_	9	punct	_	_
+9	milk	milk	NOUN	NN	Number=Sing	7	conj	_	Bridge=47<49|Entity=(49-substance-acc:inf-cf5-1-coref)
+10	and	and	CCONJ	CC	_	11	cc	_	_
+11	salt	salt	NOUN	NN	Number=Sing	7	conj	_	Entity=39)|SpaceAfter=No|XML=</ref>
+12	.	.	PUNCT	.	_	5	punct	_	_
