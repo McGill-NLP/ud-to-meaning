@@ -1,5 +1,6 @@
 #from nltk.inference import TableauProver # helps resolve anaphora
 from nltk.sem.drt import * # all the DRT things
+from nltk.sem.logic import unique_variable # helps for manipulating DRT expressions
 import conllu # reading ConLL-U files
 import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
@@ -259,8 +260,23 @@ def compute_conj(den1, den2, semtype):
         return den1 + den2
     elif semtype.is_atomic():
         return DrtExpression.fromstring(str(den1)+"-and-"+str(den2))
-    # Now we will need.... some kind of recursion. But how?
-    return den1
+    # Now we deal with types that are functions from somewhere to somewhere else.
+    # It will involve heavy use of new variables.
+    lefttype = semtype.get_left()
+    if lefttype.is_atomic() and lefttype != SemType.fromstring('t'):
+        a = DrtVariableExpression(unique_variable())
+        astr = str(a)
+        b = DrtVariableExpression(unique_variable())
+        bstr = str(b)
+        x = DrtVariableExpression(unique_variable())
+        xstr = str(x)
+        recursivecallstr = str(compute_conj(den1(a).simplify(),den2(b).simplify(),semtype.get_right()))
+        return DrtExpression.fromstring(rf'\{xstr}.({recursivecallstr}+([{astr} {bstr}],[partof({astr},{xstr}) partof({bstr},{xstr})]))').simplify()
+    else:
+        x = DrtVariableExpression(unique_variable())
+        xstr = str(x)
+        recursivecallstr = str(compute_conj(den1(x).simplify(),den2(x).simplify(),semtype.get_right()))
+        return DrtExpression.fromstring(rf'\{xstr}.{recursivecallstr}').simplify()
 
 # MARK all the word and relation semantic types.
 
