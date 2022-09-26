@@ -214,6 +214,10 @@ relmeanings = {
     "root":DrtExpression.fromstring(r'\F.F((\x.([],[])))'),
 }
 
+# Some POS's and relations should be explicitly ignored.
+POSwithnoden = ["CCONJ","PUNCT"]
+relswithnoden = ["cc","conj","punct"]
+
 # This function takes a Token as input
 # and returns a new Token
 # identical to the first, but with denotations added
@@ -224,7 +228,7 @@ relmeanings = {
 # it simply matches to whatever denotation is stored for that word/relation.
 def add_denotation(t):
     t = copy.deepcopy(t)
-    if t['upos'] == 'PUNCT':
+    if t['upos'] in POSwithnoden:
         return t
     elif t['upos'] == 'DET':
         if t['lemma'] in detmeanings.keys():
@@ -234,13 +238,13 @@ def add_denotation(t):
     elif t['upos'] in postemplates.keys():
         t['word_den'] = DrtExpression.fromstring(postemplates[t['upos']].format(t['lemma']))
     else:
-        print("The word {} with ID {} is an unknown POS.".format(t['form'],str(t['id'])))
-    if t['deprel'] == 'punct':
+        print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
+    if t['deprel'] in relswithnoden:
         return t
     elif t['deprel'] in relmeanings.keys():
         t['rel_den'] = relmeanings[t['deprel']]
     else:
-        print("The relation {} on the word with ID {} is an unknown relation.".format(t['deprel'],str(t['id'])))
+        print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
 
 # MARK all the word and relation semantic types.
@@ -291,6 +295,10 @@ reltypes = {
     "conj":SemType.fromstring('(?(??))'), 
 }
 
+# Some POS's and relations should be explicitly ignored.
+POSwithnotype = ["CCONJ","PUNCT"]
+relswithnotype = ["cc","punct"]
+
 # This function takes a Token as input
 # and returns a new Token
 # identical to the first, but with semantic types added
@@ -299,18 +307,18 @@ reltypes = {
 # Otherwise, it simply matches to whatever type is stored for that part-of-speech/relation.
 def add_type(t):
     t = copy.deepcopy(t)
-    if t['upos'] == 'PUNCT':
+    if t['upos'] in POSwithnotype:
         return t
     elif t['upos'] in postypes.keys():
         t['word_type'] = postypes[t['upos']]
     else:
-        print("The word {} with ID {} is an unknown POS.".format(t['form'],str(t['id'])))
-    if t['deprel'] == 'punct':
+        print("The word {} with ID {} is a POS with unknown type.".format(t['form'],str(t['id'])))
+    if t['deprel'] in relswithnotype:
         return t
     elif t['deprel'] in reltypes.keys():
         t['rel_type'] = reltypes[t['deprel']]
     else:
-        print("The relation {} on the word with ID {} is an unknown relation.".format(t['deprel'],str(t['id'])))
+        print("The relation {} on the word with ID {} is a relation with unknown type.".format(t['deprel'],str(t['id'])))
     return t
 
 # MARK actual semantic parsing
