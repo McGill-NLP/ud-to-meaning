@@ -262,15 +262,6 @@ def compute_conj(den1, den2, semtype):
     # Now we will need.... some kind of recursion. But how?
     return den1
 
-myden1 = DrtExpression.fromstring(r'\x.([],[big(x)])')
-myden2 = DrtExpression.fromstring(r'\x.([],[blue(x)])')
-mysemtype = SemType.fromstring('(et)')
-
-# The ((ut)t) thing works!!
-yourden1 = DrtExpression.fromstring(r'\H.(([x],[big(x)]) + H(x))')
-yourden2 = DrtExpression.fromstring(r'\H.(([x],[blue(x)]) + H(x))')
-yoursemtype = SemType.fromstring('((et)t)')
-
 # MARK all the word and relation semantic types.
 
 postypes = {
@@ -417,8 +408,6 @@ def simplifynodetyped(treenode):
                 child.token['word_den'] = child.token['word_den'].replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True)
                 # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
                 if child.token['deprel'] == 'conj':
-                    print("got one!")
-                    print(child.token['rel_type'])
                     treenode.token['word_den'] = compute_conj(treenode.token['word_den'],child.token['word_den'],child.token['word_type'])
                 else:
                     treenode.token['word_den'] = child.token['rel_den'](treenode.token['word_den'])(child.token['word_den']).simplify()
@@ -559,13 +548,13 @@ print_sentence_and_parse(testconllu)
 
 # coordinate structures with nouns and adjectives
 with open("conllus\\fraud and corruption prevent a fair and proper expression of the public voice.conll") as f:
-    testcollu = f.read()
+    testconllu = f.read()
 print_sentence_and_parse(testconllu)
 
 
 # coordinate structures with verb phrases
 with open("conllus\\during the middle ages athens experienced a decline but re-emerged under byzantian rule.conll") as f:
-    testcollu = f.read()
+    testconllu = f.read()
 print_sentence_and_parse(testconllu)
 
 
