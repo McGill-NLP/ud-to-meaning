@@ -194,6 +194,7 @@ detmeanings = {
     "the":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
     "some":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
     "every":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
+    "all":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
     "each":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
     "∅-indf":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
     "∅-def":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))')
@@ -209,7 +210,7 @@ relmeanings = {
     "obl":DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'),
     "case":DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))'),
     "ccomp":DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'),
-    "csubj":DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'),
+    "csubj":DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))'),
     "root":DrtExpression.fromstring(r'\F.F((\x.([],[])))'),
 }
 
