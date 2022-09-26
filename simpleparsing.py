@@ -384,10 +384,9 @@ def simplifynodetyped(treenode):
                 # TODO The next line is a hack; really should fix the DrtExpression code directly.
                 child.token['word_den'] = child.token['word_den'].replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True)
                 treenode.token['word_den'] = child.token['rel_den'](treenode.token['word_den'])(child.token['word_den']).simplify()
+                treenode.token['word_type'] = child.token['rel_type'].get_right().get_right()
         elif iopairs:
             print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
-        # Then we set the type to whatever it needs to be, and remove the children.
-        treenode.token['word_type'] = treenode.token['rel_type'].get_right().get_left()
         treenode.children = []
     # If the word has children and is an incompatible type,
     # the binarization will catch it.
