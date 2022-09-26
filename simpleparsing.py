@@ -287,6 +287,8 @@ reltypes = {
             CompositeType(SemType.fromstring('?'),
             SemType.fromstring('((st)t)'))),
     "root":SemType.fromstring('(t(((st)t)t))'),
+    # This is not the true type of conj, but what it has to be before simplify_node_typed runs.
+    "conj":SemType.fromstring('(?(??))'), 
 }
 
 # This function takes a Token as input
