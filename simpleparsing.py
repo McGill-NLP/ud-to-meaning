@@ -425,7 +425,7 @@ def simplifynodetyped(treenode):
             for i in binarizations[0]:
                 child = usefulchildren[i]
                 # TODO The next line is a hack; really should fix the DrtExpression code directly.
-                child.token['word_dens'] = [den.replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True) for den in child.token['word_dens']]
+                child.token['word_dens'] = [den.replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True) for den in child.token['word_dens']]
                 # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
                 if child.token['deprel'] == 'conj':
                     treenode.token['word_dens'] = [compute_conj(nodeden,childden,child.token['word_type'])
