@@ -248,8 +248,12 @@ def add_denotation(t):
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
 
-# TODO add comment explaining this
-# den1 and den2 are two denotations, and semtype is of course their semantic type.
+# This function computes the conjunction (in an essentially Lasersohn way) of two lambda-expressions
+# den1 and den2 are two DRS lambda-expressions.
+# They must both have the same semantic type, which is semtype.
+# The function computes and returns their conjunction,
+# which has the same semantic type.
+# It won't work very well until we fix the DRS simplification code.
 def compute_conj(den1, den2, semtype):
     # There's a special proviso for semantic types ((et)t) and ((st)t)
     if semtype.like(SemType.fromstring('((ut)t)')):
