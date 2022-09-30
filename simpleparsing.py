@@ -233,17 +233,17 @@ def add_denotation(t):
         return t
     elif t['upos'] == 'DET':
         if t['lemma'] in detmeanings.keys():
-            t['word_den'] = detmeanings[t['lemma']]
+            t['word_dens'] = [detmeanings[t['lemma']]]
         else:
             print("The word {} with ID {} is an unknown type of determiner.".format(t['form'],str(t['id'])))
     elif t['upos'] in postemplates.keys():
-        t['word_den'] = DrtExpression.fromstring(postemplates[t['upos']].format(t['lemma']))
+        t['word_dens'] = [DrtExpression.fromstring(postemplates[t['upos']].format(t['lemma']))]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
     if t['deprel'] in relswithnoden:
         return t
     elif t['deprel'] in relmeanings.keys():
-        t['rel_den'] = relmeanings[t['deprel']]
+        t['rel_dens'] = [relmeanings[t['deprel']]]
     else:
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
@@ -425,12 +425,17 @@ def simplifynodetyped(treenode):
             for i in binarizations[0]:
                 child = usefulchildren[i]
                 # TODO The next line is a hack; really should fix the DrtExpression code directly.
-                child.token['word_den'] = child.token['word_den'].replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True)
+                child.token['word_dens'] = [den.replace(DrtExpression.fromstring('x').variable,DrtExpression.fromstring('a'),True) for den in child.token['word_dens']]
                 # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
                 if child.token['deprel'] == 'conj':
-                    treenode.token['word_den'] = compute_conj(treenode.token['word_den'],child.token['word_den'],child.token['word_type'])
+                    treenode.token['word_dens'] = [compute_conj(nodeden,childden,child.token['word_type'])
+                                                        for nodeden in treenode.token['word_dens']
+                                                        for childden in child.token['word_dens']]
                 else:
-                    treenode.token['word_den'] = child.token['rel_den'](treenode.token['word_den'])(child.token['word_den']).simplify()
+                    treenode.token['word_dens'] = [relden(nodeden)(childden).simplify()
+                                                        for relden in child.token['rel_dens']
+                                                        for nodeden in treenode.token['word_dens']
+                                                        for childden in child.token['word_dens']]
                 treenode.token['word_type'] = child.token['rel_type'].get_right().get_right()
         elif iopairs:
             print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
@@ -451,7 +456,9 @@ def simplifynodetyped(treenode):
             str(treenode.token['word_type']),str(treenode.token['id']),str(treenode.token['rel_type'])))
     # Root only takes one argument, and after we use it, we trash the relation.
     if treenode.token['deprel'] == 'root':
-        treenode.token['word_den'] = treenode.token['rel_den'](treenode.token['word_den']).simplify()
+        treenode.token['word_dens'] = [relden(wordden).simplify()
+                                                for relden in treenode.token['rel_dens']
+                                                for wordden in treenode.token['word_dens']]
     return treenode
 
 # This function summarizes all the things we would want to do
@@ -470,7 +477,8 @@ def print_sentence_and_parse(testconllu):
     withtypes = conllu.TokenList([add_type(token) for token in withdens])
     # Then collapse all the nodes together!
     simplified = simplifynodetyped(withtypes.to_tree())
-    simplified.token['word_den'].pretty_print()
+    for den in simplified.token['word_dens']:
+        den.pretty_print()
 
 # MARK Demos with a few Conll files
 
@@ -548,7 +556,7 @@ print_sentence_and_parse(testconllu)
 
 
 # ccomp relation
-# TODO note that the answer does not simplify because of the band-aid on the DRT module
+# note that the answer does not simplify because of the band-aid on the DRT module
 with open("conllus\\the authors say the results confirm the existence of inadequate iodine intake in the australian population.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
