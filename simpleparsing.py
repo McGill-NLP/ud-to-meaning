@@ -181,14 +181,14 @@ def preprocess(sentence):
 # Right now the program disregards punctuation entirely.
 # The "simplifytyped" also disregards any relations it does not know, with a warning.
 postemplates = {
-    "ADJ":r'\x.([],[{}(x)])',
-    "ADV":r'\x.([],[{}(x)])',
-    "NOUN":r'\x.([],[{}(x)])',
-    "PROPN":r'\x.([],[name(x,{})])',
-    "VERB":r'\H.(([e],[{}(e)]) + H(e))',
-    "PUNCT":r'([],[])',
-    "ADP":r'\x.\y.([],[{}(y,x)])',
-    "NUM":r'\x.([],[number(x,{})])',
+    "ADJ":[r'\x.([],[{}(x)])'],
+    "ADV":[r'\x.([],[{}(x)])'],
+    "NOUN":[r'\x.([],[{}(x)])'],
+    "PROPN":[r'\x.([],[name(x,{})])'],
+    "VERB":[r'\H.(([e],[{}(e)]) + H(e))'],
+    "PUNCT":[r'([],[])'],
+    "ADP":[r'\x.\y.([],[{}(y,x)])'],
+    "NUM":[r'\x.([],[number(x,{})])'],
 }
 detmeanings = {
     "a":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
@@ -201,18 +201,18 @@ detmeanings = {
     "∅-def":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))')
 }
 relmeanings = {
-    "nsubj":DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))'),
-    "obj":DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[obj(x,y)])+H(x))))))'),
-    "amod":DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'),
-    "nummod":DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'),
-    "nmod":DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'),
-    "det":DrtExpression.fromstring(r'\F.\G.G(F)'),
-    "advmod":DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'),
-    "obl":DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'),
-    "case":DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))'),
-    "ccomp":DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'),
-    "csubj":DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))'),
-    "root":DrtExpression.fromstring(r'\F.F((\x.([],[])))'),
+    "nsubj":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))')],
+    "obj":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[obj(x,y)])+H(x))))))')],
+    "amod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
+    "nummod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
+    "nmod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
+    "det":[DrtExpression.fromstring(r'\F.\G.G(F)')],
+    "advmod":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))')],
+    "obl":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))')],
+    "case":[DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))')],
+    "ccomp":[DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))')],
+    "csubj":[DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))')],
+    "root":[DrtExpression.fromstring(r'\F.F((\x.([],[])))')],
 }
 
 # Some POS's and relations should be explicitly ignored.
@@ -237,13 +237,14 @@ def add_denotation(t):
         else:
             print("The word {} with ID {} is an unknown type of determiner.".format(t['form'],str(t['id'])))
     elif t['upos'] in postemplates.keys():
-        t['word_dens'] = [DrtExpression.fromstring(postemplates[t['upos']].format(t['lemma']))]
+        t['word_dens'] = [DrtExpression.fromstring(template.format(t['lemma']))
+                            for template in postemplates[t['upos']]]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
     if t['deprel'] in relswithnoden:
         return t
     elif t['deprel'] in relmeanings.keys():
-        t['rel_dens'] = [relmeanings[t['deprel']]]
+        t['rel_dens'] = relmeanings[t['deprel']]
     else:
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
