@@ -189,16 +189,8 @@ postemplates = {
     "PUNCT":[r'([],[])'],
     "ADP":[r'\x.\y.([],[{}(y,x)])'],
     "NUM":[r'\x.([],[number(x,{})])'],
-}
-detmeanings = {
-    "a":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
-    "the":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
-    "some":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
-    "every":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
-    "all":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
-    "each":DrtExpression.fromstring(r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
-    "∅-indf":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))'),
-    "∅-def":DrtExpression.fromstring(r'\F.\G.(([x],[]) + F(x) + G(x))')
+    "DET":[r'\F.\G.(([x],[]) + F(x) + G(x))',
+            r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'],
 }
 relmeanings = {
     "nsubj":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))')],
@@ -231,11 +223,6 @@ def add_denotation(t):
     t = copy.deepcopy(t)
     if t['upos'] in POSwithnoden:
         return t
-    elif t['upos'] == 'DET':
-        if t['lemma'] in detmeanings.keys():
-            t['word_dens'] = [detmeanings[t['lemma']]]
-        else:
-            print("The word {} with ID {} is an unknown type of determiner.".format(t['form'],str(t['id'])))
     elif t['upos'] in postemplates.keys():
         t['word_dens'] = [DrtExpression.fromstring(template.format(t['lemma']))
                             for template in postemplates[t['upos']]]
