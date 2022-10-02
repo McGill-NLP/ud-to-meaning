@@ -217,8 +217,6 @@ relswithnoden = ["cc","conj","punct"]
 # for both the word itself ("word_den") and its relation ("rel_den").
 # It adds no denotation to punctuation Tokens,
 # and adds a denotation based on one of the templates to any non-determiner word.
-# For determiners and dependency relations,
-# it simply matches to whatever denotation is stored for that word/relation.
 def add_denotation(t):
     t = copy.deepcopy(t)
     if t['upos'] in POSwithnoden:
