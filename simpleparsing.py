@@ -344,7 +344,7 @@ def add_type(t):
 
 # MARK actual semantic parsing
 
-# This function takes three inputs:
+# This function takes four inputs:
 # start is any type of thing, but usually a SemType
 # end is any type of thing, but usually a SemType
 # iopairs is a list of tuples of things of the same type as start and end
@@ -376,6 +376,40 @@ def semtypebinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
                     binarizations.append([i]+tail)
     return binarizations
 
+# This function takes four inputs:
+# start is any type of thing, but usually a SemType
+# end is any type of thing, but usually a SemType
+# iopairs is a list of lists of tuples of things of the same type as start and end
+# comp_func is an optional argument. It is a function that takes two things of the types of start and end,
+#             and returns a boolean which should be taken to express whether those are equal.
+# The function returns a list of lists;
+# each list in the returned list contains 2-uples.
+# Their first elements of the 2-uples give an ordering of the numbers 0 through len(iopairs)-1
+# by the same principles as semtypebinarizations.
+# But now we are giving it an option of one of several iopairs for each ordering-element
+# (like dominos with multiple faces)
+# so the second elements of the 2-uples tell which element of iopairs is chosen for that domino.
+# This is used to find a correct order of composition for a Token's dependents,
+# when multiple semantic types are possible
+def multidominobinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
+    binarizations = []
+    if len(iopairs)==1:
+        for k in range(len(iopairs[0])):
+            if comp_func(iopairs[0][k][0],start) and comp_func(iopairs[0][k][1],end):
+                binarizations.append([(0,k)])
+    else:
+        for m in range(len(iopairs)):
+            pair = iopairs[m]
+            for k in range(len(pair)):
+                if comp_func(pair[k][0],start):
+                    tails = multidominobinarizations(pair[k][1],end,iopairs[:m]+iopairs[m+1:],comp_func)
+                    for tail in tails:
+                        for n in range(len(tail)):
+                            if tail[n][0] >= m:
+                                tail[n] = (tail[n][0] + 1, tail[n][1])
+                        binarizations.append([(m,k)]+tail)
+    return binarizations
+ 
 # This function take a TokenTree as input,
 # and returns a new TokenTree with no children
 # It traverses the tree depth-first,
