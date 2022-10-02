@@ -13,6 +13,17 @@ class SemType:
 
     def __repr__(self):
         return "<SemType "+str(self) + ">"
+
+    def __str__(self):
+        return 'SemType()'
+    
+    # Only "like" other things which have no sub-type and are just SemType.
+    def like(self,other):
+        return self.__class__ == other.__class__
+
+    # Only "equal to" other things which have no sub-type and are just SemType.
+    def __eq__(self,other):
+        return self.__class__ == other.__class__
     
     # TODO this needs to be fixed -
     # it doesn't always choose a bracketing that will succeed...
