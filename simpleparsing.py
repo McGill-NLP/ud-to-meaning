@@ -574,21 +574,3 @@ print_sentence_and_parse(testconllu)
 with open("conllus\\during the middle ages athens experienced a decline but re-emerged under byzantian rule.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
-
-
-# csubj and coordinate structures with adjectives (and null "mark" and "cop")
-with open("conllus\\to continue this long trend is to guarantee tremendous social, cultural, political, and economic upheavals.conll") as f:
-    testconllu = f.read()
-print_sentence_and_parse(testconllu)
-
-
-# coordinate structures with mismatched syntax
-with open("conllus\\byron met and formed a close friendship with the younger john edleston.conll") as f:
-    testconllu = f.read()
-print_sentence_and_parse(testconllu)
-
-
-# csubj and coordinate structures with mismatched syntax
-with open("conllus\\practicing cultural relativism requires an open mind and a willingness to consider and even adapt to new values and norms.conll") as f:
-    testconllu = f.read()
-print_sentence_and_parse(testconllu)
