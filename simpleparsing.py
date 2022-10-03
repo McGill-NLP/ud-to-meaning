@@ -404,24 +404,37 @@ def simplifynodetyped(treenode):
     binarizations = multidominobinarizations(SemType(),SemType(),iopairs,comp_func = lambda x,y:x.like(y))
     # Binarizations tell you which dependents to combine first.
     if binarizations:
-        # TODO Change binarization code to allow for multiple binarizations.
-        for term in binarizations[0][1:-1]:
-            child = usefulchildren[term[0]-1] # the first index in the binarization is the Start token
-            # TODO The next line is a hack; really should fix the DrtExpression code directly.
-            child.token['word_dens'] = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True)) for den in child.token['word_dens']]
-            # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
-            if child.token['deprel'] == 'conj':
-                treenode.token['word_dens'] = [(childden[0],compute_conj(nodeden[1],childden[1],childden[0]))
-                                                    for nodeden in treenode.token['word_dens']
-                                                    for childden in child.token['word_dens']]
-            else:
-                treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
-                                                relden[1](nodeden[1])(childden[1]).simplify())
-                                                    for relden in child.token['rel_dens']
-                                                    for nodeden in treenode.token['word_dens']
-                                                    for childden in child.token['word_dens']]
+        # TODO currently this leaves me with too many binarizations,
+        # which are not genuinely different.
+        # Need a way to tell whether two computed denotations are really different.
+        nodedens = []
+        for binarization in binarizations:
+            nodeden = treenode.token['word_dens'][binarization[0][1]]
+            newnodedens = [nodeden]
+            for term in binarization[1:-1]:
+                child = usefulchildren[term[0]-1]
+                childrelden = child.token['rel_dens'][term[1]]
+                usefulchilddens = [den
+                                    for den in child.token['word_dens']
+                                    if den[0].like(childrelden[0].get_right().get_left())]
+                # TODO The next line is a hack; really should fix the DrtExpression code directly.
+                usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True))
+                                    for den in usefulchilddens]
+                # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
+                if child.token['deprel'] == 'conj':
+                    newnodedens = [(childden[0],compute_conj(newnodeden[1],childden[1],childden[0]))
+                                                        for childden in usefulchilddens
+                                                        for newnodeden in newnodedens]
+                else:
+                    newnodedens = [(childrelden[0].get_right().get_right(),
+                                                    childrelden[1](newnodeden[1])(childden[1]).simplify())
+                                                        for childden in usefulchilddens
+                                                        for newnodeden in newnodedens]
+            nodedens = nodedens + newnodedens
     elif iopairs:
         print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
+    if usefulchildren:
+        treenode.token['word_dens'] = nodedens
     treenode.children = []
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
