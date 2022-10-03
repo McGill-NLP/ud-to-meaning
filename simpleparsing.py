@@ -177,39 +177,73 @@ def preprocess(sentence):
             )
 
 # MARK all the word denotation templates, and relation denotations.
+# Now they are all pairs of one SemType and one DRT expression.
 
 # Right now the program disregards punctuation entirely.
 # The "simplifytyped" also disregards any relations it does not know, with a warning.
 postemplates = {
-    "ADJ":[r'\x.([],[{}(x)])'],
-    "ADV":[r'\x.([],[{}(x)])'],
-    "NOUN":[r'\x.([],[{}(x)])'],
-    "PROPN":[r'\x.([],[name(x,{})])'],
-    "VERB":[r'\H.(([e],[{}(e)]) + H(e))'],
-    "PUNCT":[r'([],[])'],
-    "ADP":[r'\x.\y.([],[{}(y,x)])'],
-    "NUM":[r'\x.([],[number(x,{})])'],
-    "DET":[r'\F.\G.(([x],[]) + F(x) + G(x))',
-            r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'],
+    "ADJ":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
+    "ADV":[(SemType.fromstring('(st)'),r'\x.([],[{}(x)])')],
+    "NOUN":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
+    "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[name(x,{})])')],
+    "VERB":[(SemType.fromstring('((st)t)'),r'\H.(([e],[{}(e)]) + H(e))')],
+    "PUNCT":[(SemType.fromstring('t'),r'([],[])')],
+    "ADP":[(SemType.fromstring('(e(ut))'),r'\x.\y.([],[{}(y,x)])')],
+    "NUM":[(SemType.fromstring('(et)'),r'\x.([],[number(x,{})])')],
+    "DET":[(SemType.fromstring('((et)((et)t))'),r'\F.\G.(([x],[]) + F(x) + G(x))'),
+            (SemType.fromstring('((et)((et)t))'),r'\F.\G.([],[-(([x][-G(x)]) + F(x))])')],
 }
+
 relmeanings = {
-    "nsubj":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))')],
-    "obj":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[obj(x,y)])+H(x))))))')],
-    "amod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
-    "nummod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
-    "nmod":[DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')],
-    "det":[DrtExpression.fromstring(r'\F.\G.G(F)')],
-    "advmod":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))')],
-    "obl":[DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))')],
-    "case":[DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))')],
-    "ccomp":[DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))')],
-    "csubj":[DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))')],
-    "root":[DrtExpression.fromstring(r'\F.F((\x.([],[])))')],
+    "nsubj":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))'))],
+    "obj":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[obj(x,y)])+H(x))))))'))],
+    "amod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
+            DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'))],
+    "nummod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
+            DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'))],
+    "nmod":[(CompositeType(SemType.fromstring('(et)'),
+            CompositeType(SemType.fromstring('(et)'),
+            SemType.fromstring('(et)'))),
+            DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'))],
+    "det":[(CompositeType(SemType.fromstring('(et)'),
+            CompositeType(SemType.fromstring('((et)((et)t))'),
+            SemType.fromstring('((et)t)'))),
+            DrtExpression.fromstring(r'\F.\G.G(F)'))],
+    "advmod":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('(st)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'))],
+    "obl":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('(st)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.(G(x) + H(x))))'))],
+    "case":[(CompositeType(SemType.fromstring('((et)t)'),
+            CompositeType(SemType.fromstring('(e(ut))'),
+            SemType.fromstring('(ut)'))),
+            DrtExpression.fromstring(r'\F.\G.\x.F(\y.G(y,x))'))],
+    "ccomp":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('?'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'))],
+    "csubj":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('?'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))'))],
+    "root":[(SemType.fromstring('(t(((st)t)t))'),
+            DrtExpression.fromstring(r'\F.F((\x.([],[])))'))],
+    # This is not the true type of conj, but what it has to be before simplify_node_typed runs.
+    "conj":[(SemType.fromstring('(?(??))'),None)], 
 }
 
 # Some POS's and relations should be explicitly ignored.
 POSwithnoden = ["CCONJ","PUNCT"]
-relswithnoden = ["cc","conj","punct"]
+relswithnoden = ["cc","punct"]
 
 # This function takes a Token as input
 # and returns a new Token
@@ -222,7 +256,7 @@ def add_denotation(t):
     if t['upos'] in POSwithnoden:
         return t
     elif t['upos'] in postemplates.keys():
-        t['word_dens'] = [DrtExpression.fromstring(template.format(t['lemma']))
+        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'])))
                             for template in postemplates[t['upos']]]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
@@ -267,80 +301,6 @@ def compute_conj(den1, den2, semtype):
         xstr = str(x)
         recursivecallstr = str(compute_conj(den1(x).simplify(),den2(x).simplify(),semtype.get_right()))
         return DrtExpression.fromstring(rf'\{xstr}.{recursivecallstr}').simplify()
-
-# MARK all the word and relation semantic types.
-
-postypes = {
-    "ADJ":SemType.fromstring('(et)'),
-    "NUM":SemType.fromstring('(et)'),
-    "ADV":SemType.fromstring('(st)'),
-    "NOUN":SemType.fromstring('(et)'),
-    "PROPN":SemType.fromstring('(et)'),
-    "VERB":SemType.fromstring('((st)t)'),
-    "PUNCT":SemType.fromstring('t'),
-    "ADP":SemType.fromstring('(e(ut))'),
-    "DET":SemType.fromstring('((et)((et)t))'),
-}
-reltypes = {
-    "nsubj":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('((et)t)'),
-            SemType.fromstring('((st)t)'))),
-    "obj":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('((et)t)'),
-            SemType.fromstring('((st)t)'))),
-    "amod":CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
-    "nummod":CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
-    "nmod":CompositeType(SemType.fromstring('(et)'),
-            CompositeType(SemType.fromstring('(et)'),
-            SemType.fromstring('(et)'))),
-    "det": CompositeType(SemType.fromstring('(et)'),
-            CompositeType(SemType.fromstring('((et)((et)t))'),
-            SemType.fromstring('((et)t)'))),
-    "advmod":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('(st)'),
-            SemType.fromstring('((st)t)'))),
-    "obl":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('(st)'),
-            SemType.fromstring('((st)t)'))),
-    "case":CompositeType(SemType.fromstring('((et)t)'),
-            CompositeType(SemType.fromstring('(e(ut))'),
-            SemType.fromstring('(ut)'))),
-    "ccomp":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('?'),
-            SemType.fromstring('((st)t)'))),
-    "csubj":CompositeType(SemType.fromstring('((st)t)'),
-            CompositeType(SemType.fromstring('?'),
-            SemType.fromstring('((st)t)'))),
-    "root":SemType.fromstring('(t(((st)t)t))'),
-    # This is not the true type of conj, but what it has to be before simplify_node_typed runs.
-    "conj":SemType.fromstring('(?(??))'), 
-}
-
-# Some POS's and relations should be explicitly ignored.
-POSwithnotype = ["CCONJ","PUNCT"]
-relswithnotype = ["cc","punct"]
-
-# This function takes a Token as input
-# and returns a new Token
-# identical to the first, but with semantic types added
-# for both the word itself ("word_type") and its relation ("rel_type").
-# It adds no type to punctuation Tokens.
-# Otherwise, it simply matches to whatever type is stored for that part-of-speech/relation.
-def add_type(t):
-    t = copy.deepcopy(t)
-    if t['upos'] in POSwithnotype:
-        return t
-    elif t['upos'] in postypes.keys():
-        t['word_type'] = postypes[t['upos']]
-    else:
-        print("The word {} with ID {} is a POS with unknown type.".format(t['form'],str(t['id'])))
-    if t['deprel'] in relswithnotype:
-        return t
-    elif t['deprel'] in reltypes.keys():
-        t['rel_type'] = reltypes[t['deprel']]
-    else:
-        print("The relation {} on the word with ID {} is a relation with unknown type.".format(t['deprel'],str(t['id'])))
-    return t
 
 # MARK actual semantic parsing
 
@@ -420,63 +380,60 @@ def multidominobinarizations(start, end, iopairs, comp_func = lambda x, y: x==y)
 # because "root" relation has no head.
 # If all the nodes in a TokenTree have been correctly typed and given denotations,
 # applying simplifynodetyped to the root should give a correct denotation for the sentence
-# in the "word_den" field of the resulting TokenTree.
+# in the "word_dens" field of the resulting TokenTree.
 def simplifynodetyped(treenode):
     # Ignore nodes whose types we don't know.
     treenode = copy.deepcopy(treenode)
-    if ('rel_type' not in treenode.token.keys()) or ('word_type' not in treenode.token.keys()):
+    if ('rel_dens' not in treenode.token.keys()) or ('word_dens' not in treenode.token.keys()):
         return treenode
-    if len(treenode.children) > 0:
-        # Depth-first: simplify children first.
-        treenode.children = [simplifynodetyped(child) for child in treenode.children]
-        # Compute binarizations
-        starttype = treenode.token['word_type']
-        endtype = treenode.token['rel_type'].get_right().get_left()
-        iopairs = []
-        usefulchildren = []
-        for child in treenode.children:
-            if 'rel_type' in child.token.keys() and 'word_type' in child.token.keys():
-                iopairs.append((child.token['rel_type'].get_left(),child.token['rel_type'].get_right().get_right()))
-                usefulchildren.append(child)
-        binarizations = semtypebinarizations(starttype,endtype,iopairs,comp_func = lambda x,y:x.like(y))
-        # Binarizations tell you which dependents to combine first.
-        if binarizations:
-            # TODO Change binarization code to allow for multiple binarizations.
-            for i in binarizations[0]:
-                child = usefulchildren[i]
-                # TODO The next line is a hack; really should fix the DrtExpression code directly.
-                child.token['word_dens'] = [den.replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True) for den in child.token['word_dens']]
-                # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
-                if child.token['deprel'] == 'conj':
-                    treenode.token['word_dens'] = [compute_conj(nodeden,childden,child.token['word_type'])
-                                                        for nodeden in treenode.token['word_dens']
-                                                        for childden in child.token['word_dens']]
-                else:
-                    treenode.token['word_dens'] = [relden(nodeden)(childden).simplify()
-                                                        for relden in child.token['rel_dens']
-                                                        for nodeden in treenode.token['word_dens']
-                                                        for childden in child.token['word_dens']]
-                treenode.token['word_type'] = child.token['rel_type'].get_right().get_right()
-        elif iopairs:
-            print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
-        treenode.children = []
+    # Depth-first: simplify children first.
+    treenode.children = [simplifynodetyped(child) for child in treenode.children]
+    # Compute binarizations
+    iopairs = []
+    usefulchildren = []
+    for child in treenode.children:
+        if 'rel_dens' in child.token.keys() and 'word_dens' in child.token.keys():
+            iopairs.append([(den[0].get_left(),den[0].get_right().get_right()) for den in child.token['rel_dens']])
+            usefulchildren.append(child)
+    # we'll encode multiple possible denotations of this node as possible first dominos
+    # with dummy starting type
+    starts = [(SemType(),den[0]) for den in treenode.token['word_dens']]
+    ends = [(den[0].get_right().get_left(),SemType()) for den in treenode.token['rel_dens']]
+    iopairs = [starts] + iopairs + [ends]
+    binarizations = multidominobinarizations(SemType(),SemType(),iopairs,comp_func = lambda x,y:x.like(y))
+    # Binarizations tell you which dependents to combine first.
+    if binarizations:
+        # TODO Change binarization code to allow for multiple binarizations.
+        for term in binarizations[0][1:-1]:
+            child = usefulchildren[term[0]-1] # the first index in the binarization is the Start token
+            # TODO The next line is a hack; really should fix the DrtExpression code directly.
+            child.token['word_dens'] = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True)) for den in child.token['word_dens']]
+            # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
+            if child.token['deprel'] == 'conj':
+                treenode.token['word_dens'] = [(childden[0],compute_conj(nodeden[1],childden[1],childden[0]))
+                                                    for nodeden in treenode.token['word_dens']
+                                                    for childden in child.token['word_dens']]
+            else:
+                treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
+                                                relden[1](nodeden[1])(childden[1]).simplify())
+                                                    for relden in child.token['rel_dens']
+                                                    for nodeden in treenode.token['word_dens']
+                                                    for childden in child.token['word_dens']]
+    elif iopairs:
+        print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
+    treenode.children = []
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
     # so we have to update its semantic type after simplifying this node.
     # It will change the "conj" from "(?(??))" to replace all the ?'s with the type of this node.
     if treenode.token['deprel'] == 'conj':
-        treenode.token['rel_type'] = CompositeType(treenode.token['word_type'],
-                                        CompositeType(treenode.token['word_type'],
-                                        treenode.token['word_type']))
-    # If the word has children and is an incompatible type,
-    # the binarization will catch it.
-    # but if it has no children, we still want the type to be right.
-    if not treenode.token['word_type'].like(treenode.token['rel_type'].get_right().get_left()):
-        print("The word type {} at the word with ID {} is incompatible with rel type {}".format(
-            str(treenode.token['word_type']),str(treenode.token['id']),str(treenode.token['rel_type'])))
-    # Root only takes one argument, and after we use it, we trash the relation.
+        treenode.token['rel_dens'] = [(CompositeType(den[0],
+                                        CompositeType(den[0],
+                                        den[0])),None) for den in treenode.token['word_dens']]
+    # Root only takes one argument
     if treenode.token['deprel'] == 'root':
-        treenode.token['word_dens'] = [relden(wordden).simplify()
+        treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
+                                                relden[1](wordden[1]).simplify())
                                                 for relden in treenode.token['rel_dens']
                                                 for wordden in treenode.token['word_dens']]
     return treenode
@@ -494,11 +451,10 @@ def print_sentence_and_parse(testconllu):
     preprocessed = preprocess(testsentence)
     # Then add semantic information to each node...
     withdens = conllu.TokenList([add_denotation(token) for token in preprocessed])
-    withtypes = conllu.TokenList([add_type(token) for token in withdens])
     # Then collapse all the nodes together!
-    simplified = simplifynodetyped(withtypes.to_tree())
+    simplified = simplifynodetyped(withdens.to_tree())
     for den in simplified.token['word_dens']:
-        den.pretty_print()
+        den[1].pretty_print()
 
 # MARK Demos with a few Conll files
 
