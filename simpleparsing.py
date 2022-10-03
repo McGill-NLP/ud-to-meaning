@@ -191,7 +191,8 @@ postemplates = {
     "ADP":[(SemType.fromstring('(e(ut))'),r'\x.\y.([],[{}(y,x)])')],
     "NUM":[(SemType.fromstring('(et)'),r'\x.([],[number(x,{})])')],
     "DET":[(SemType.fromstring('((et)((et)t))'),r'\F.\G.(([x],[]) + F(x) + G(x))'),
-            (SemType.fromstring('((et)((et)t))'),r'\F.\G.([],[-(([x][-G(x)]) + F(x))])')],
+#            (SemType.fromstring('((et)((et)t))'),r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
+            ],
 }
 
 relmeanings = {
