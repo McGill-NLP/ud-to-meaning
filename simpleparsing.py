@@ -185,11 +185,11 @@ postemplates = {
     "ADJ":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
     "ADV":[(SemType.fromstring('(st)'),r'\x.([],[{}(x)])')],
     "NOUN":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
-    "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[name(x,{})])')],
+    "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[Name(x,{})])')],
     "VERB":[(SemType.fromstring('((st)t)'),r'\H.(([e],[{}(e)]) + H(e))')],
     "PUNCT":[(SemType.fromstring('t'),r'([],[])')],
     "ADP":[(SemType.fromstring('(e(ut))'),r'\x.\y.([],[{}(y,x)])')],
-    "NUM":[(SemType.fromstring('(et)'),r'\x.([],[number(x,{})])')],
+    "NUM":[(SemType.fromstring('(et)'),r'\x.([],[Number(x,{})])')],
     "DET":[(SemType.fromstring('((et)((et)t))'),r'\F.\G.(([x],[]) + F(x) + G(x))'),
 #            (SemType.fromstring('((et)((et)t))'),r'\F.\G.([],[-(([x][-G(x)]) + F(x))])'),
             ],
@@ -199,11 +199,11 @@ relmeanings = {
     "nsubj":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('((et)t)'),
             SemType.fromstring('((st)t)'))),
-            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[nsubj(x,y)])+H(x))))))'))],
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Nsubj(x,y)])+H(x))))))'))],
     "obj":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('((et)t)'),
             SemType.fromstring('((st)t)'))),
-            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[obj(x,y)])+H(x))))))'))],
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Obj(x,y)])+H(x))))))'))],
     "amod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
             DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'))],
     "nummod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
@@ -231,11 +231,11 @@ relmeanings = {
     "ccomp":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('?'),
             SemType.fromstring('((st)t)'))),
-            DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[ccomp(x,p) p:z]) + H(x)))'))],
+            DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[Ccomp(x,p) p:z]) + H(x)))'))],
     "csubj":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('?'),
             SemType.fromstring('((st)t)'))),
-            DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[csubj(x,p) p:z]) + G(x)))'))],
+            DrtExpression.fromstring(r'\F.\z.\G.F((\x.([p],[Csubj(x,p) p:z]) + G(x)))'))],
     "root":[(SemType.fromstring('(t(((st)t)t))'),
             DrtExpression.fromstring(r'\F.F((\x.([],[])))'))],
     # This is not the true type of conj, but what it has to be before simplify_node_typed runs.
@@ -257,7 +257,7 @@ def add_denotation(t):
     if t['upos'] in POSwithnoden:
         return t
     elif t['upos'] in postemplates.keys():
-        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'])))
+        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower())))
                             for template in postemplates[t['upos']]]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))

@@ -83,7 +83,8 @@ demo = compare_with_pmb("pmb-gold-english", r"\p00\d1666", stanzanlp)
 demo = compare_with_pmb("pmb-gold-english", r"\p00\d1222", stanzanlp)
 
 # Intransitive sentence with adverb: "Mary just left"
-demo = compare_with_pmb("pmb-gold-english", r"\p00\d1589", stanzanlp)
+# demo = compare_with_pmb("pmb-gold-english", r"\p00\d1589", stanzanlp)
+# (has a bug in PMB portion)
 
 # Raising: "Tom seems conceited"
 demo = compare_with_pmb("pmb-gold-english", r"\p00\d1853", stanzanlp)
