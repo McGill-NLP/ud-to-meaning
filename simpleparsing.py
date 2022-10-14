@@ -382,13 +382,17 @@ def multidominobinarizations(start, end, iopairs, comp_func = lambda x, y: x==y)
 # If all the nodes in a TokenTree have been correctly typed and given denotations,
 # applying simplifynodetyped to the root should give a correct denotation for the sentence
 # in the "word_dens" field of the resulting TokenTree.
-def simplifynodetyped(treenode):
+# If withtrace is True, then the denotations returned will have 3 components,
+# with the third a dictionary
+# containing "children" (a list of children in binarization order)
+# and "original" (the original denotation of the node)
+def simplifynodetyped(treenode, withtrace=False):
     # Ignore nodes whose types we don't know.
     treenode = copy.deepcopy(treenode)
     if ('rel_dens' not in treenode.token.keys()) or ('word_dens' not in treenode.token.keys()):
         return treenode
     # Depth-first: simplify children first.
-    treenode.children = [simplifynodetyped(child) for child in treenode.children]
+    treenode.children = [simplifynodetyped(child, withtrace) for child in treenode.children]
     # Compute binarizations
     iopairs = []
     usefulchildren = []
@@ -410,7 +414,10 @@ def simplifynodetyped(treenode):
         nodedens = []
         for binarization in binarizations:
             nodeden = treenode.token['word_dens'][binarization[0][1]]
-            newnodedens = [nodeden]
+            if withtrace:
+                newnodedens = [(nodeden[0],nodeden[1],{'children':[],'original':nodeden})]
+            else:
+                newnodedens = [(nodeden)]
             for term in binarization[1:-1]:
                 child = usefulchildren[term[0]-1]
                 childrelden = child.token['rel_dens'][term[1]]
@@ -418,24 +425,42 @@ def simplifynodetyped(treenode):
                                     for den in child.token['word_dens']
                                     if den[0].like(childrelden[0].get_right().get_left())]
                 # TODO The next line is a hack; really should fix the DrtExpression code directly.
-                usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True))
-                                    for den in usefulchilddens]
+                if withtrace:
+                    usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True),den[2])
+                                        for den in usefulchilddens]
+                else:
+                    usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True))
+                                        for den in usefulchilddens]
                 # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
                 if child.token['deprel'] == 'conj':
-                    newnodedens = [(childden[0],compute_conj(newnodeden[1],childden[1],childden[0]))
-                                                        for childden in usefulchilddens
-                                                        for newnodeden in newnodedens]
+                    if withtrace:
+                        newnodedens = [(childden[0],
+                                        compute_conj(newnodeden[1],childden[1],childden[0]),
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original']}
+                                        )
+                                                            for childden in usefulchilddens
+                                                            for newnodeden in newnodedens]
+                    else:
+                        newnodedens = [(childden[0],compute_conj(newnodeden[1],childden[1],childden[0]))
+                                                            for childden in usefulchilddens
+                                                            for newnodeden in newnodedens]
                 else:
-                    newnodedens = [(childrelden[0].get_right().get_right(),
-                                                    childrelden[1](newnodeden[1])(childden[1]).simplify())
-                                                        for childden in usefulchilddens
-                                                        for newnodeden in newnodedens]
+                    if withtrace:
+                        newnodedens = [(childrelden[0].get_right().get_right(),
+                                                        childrelden[1](newnodeden[1])(childden[1]).simplify(),
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original']}
+                                        )
+                                                            for childden in usefulchilddens
+                                                            for newnodeden in newnodedens]
+                    else:
+                        newnodedens = [(childrelden[0].get_right().get_right(),
+                                                        childrelden[1](newnodeden[1])(childden[1]).simplify())
+                                                            for childden in usefulchilddens
+                                                            for newnodeden in newnodedens]
             nodedens = nodedens + newnodedens
+        treenode.token['word_dens'] = nodedens
     elif iopairs:
         print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
-    if usefulchildren:
-        treenode.token['word_dens'] = nodedens
-    treenode.children = []
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
     # so we have to update its semantic type after simplifying this node.
@@ -446,8 +471,15 @@ def simplifynodetyped(treenode):
                                         den[0])),None) for den in treenode.token['word_dens']]
     # Root only takes one argument
     if treenode.token['deprel'] == 'root':
-        treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
-                                                relden[1](wordden[1]).simplify())
-                                                for relden in treenode.token['rel_dens']
-                                                for wordden in treenode.token['word_dens']]
+        if withtrace:
+            treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
+                                                    relden[1](wordden[1]).simplify(),
+                                                    wordden[2])
+                                                    for relden in treenode.token['rel_dens']
+                                                    for wordden in treenode.token['word_dens']]
+        else:
+            treenode.token['word_dens'] = [(relden[0].get_right().get_right(),
+                                                    relden[1](wordden[1]).simplify())
+                                                    for relden in treenode.token['rel_dens']
+                                                    for wordden in treenode.token['word_dens']]
     return treenode
