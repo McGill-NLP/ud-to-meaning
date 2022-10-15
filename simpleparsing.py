@@ -1,6 +1,8 @@
 #from nltk.inference import TableauProver # helps resolve anaphora
 from nltk.sem.drt import * # all the DRT things
 from nltk.sem.logic import unique_variable # helps for manipulating DRT expressions
+from pptree import Node # helps print traces nicely
+from pptree import print_tree # helps print traces nicely
 import conllu # reading ConLL-U files
 import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
@@ -415,7 +417,7 @@ def simplifynodetyped(treenode, withtrace=False):
         for binarization in binarizations:
             nodeden = treenode.token['word_dens'][binarization[0][1]]
             if withtrace:
-                newnodedens = [(nodeden[0],nodeden[1],{'children':[],'original':nodeden})]
+                newnodedens = [(nodeden[0],nodeden[1],{'children':[],'original':nodeden,'form':treenode.token['form'],'deprel':treenode.token['deprel']})]
             else:
                 newnodedens = [(nodeden)]
             for term in binarization[1:-1]:
@@ -436,7 +438,7 @@ def simplifynodetyped(treenode, withtrace=False):
                     if withtrace:
                         newnodedens = [(childden[0],
                                         compute_conj(newnodeden[1],childden[1],childden[0]),
-                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original']}
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel']}
                                         )
                                                             for childden in usefulchilddens
                                                             for newnodeden in newnodedens]
@@ -448,7 +450,7 @@ def simplifynodetyped(treenode, withtrace=False):
                     if withtrace:
                         newnodedens = [(childrelden[0].get_right().get_right(),
                                                         childrelden[1](newnodeden[1])(childden[1]).simplify(),
-                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original']}
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel']}
                                         )
                                                             for childden in usefulchilddens
                                                             for newnodeden in newnodedens]
@@ -483,3 +485,34 @@ def simplifynodetyped(treenode, withtrace=False):
                                                     for relden in treenode.token['rel_dens']
                                                     for wordden in treenode.token['word_dens']]
     return treenode
+
+# Turn a trace
+# (output as a denotation of a sentence, from simplifynodetyped with withtrace=True)
+# into a tree structure that pptree can print.
+def tracetotree(t, parent = None, withdrs = False):
+    if len(t) == 2:
+        name = f"{t[0]}:{t[1]}" if withdrs else str(t[0])
+        return Node(name,parent) if parent else Node(name)
+    elif len(t) == 3:
+        if t[2]['children']:
+            # has children
+            topnodename = ("[" if not parent else "") + f"{t[2]['form']}:{t[0]}" + (f":{t[1]}" if withdrs else "") + "]"
+            topnode = Node(topnodename,parent) if parent else Node(topnodename)
+            orignodename = f"[{t[2]['form']}:{t[2]['original'][0]}" + (f":{t[2]['original'][1]}" if withdrs else "")
+            orignode = Node(orignodename,topnode)
+            for child in t[2]['children']:
+                relnodename = (f"{child[1][2]['deprel']}:" if len(child[1]) > 2 else "") + f"{child[0][0]}" + (f":{child[0][1]}" if (withdrs and child[0][1]) else "")
+                relnode = Node(relnodename,orignode)
+                childnode = tracetotree(child[1],relnode)
+            return topnode
+        else:
+            # no children
+            name = ("[" if not parent else "") + f"{t[2]['form']}:{t[0]}" + (f":{t[1]}" if withdrs else "") + "]"
+            return Node(name,parent) if parent else Node(name)
+    else:
+        pass
+
+# Actually printing the trace.
+# TODO might be better to use print_tree2 rather than pptree, to preserve child order
+def printtrace(t, withdrs = False, horizontal = True):
+    print_tree(tracetotree(t,parent = None,withdrs = withdrs), horizontal = horizontal)
