@@ -245,8 +245,12 @@ relmeanings = {
 }
 
 # Some POS's and relations should be explicitly ignored.
-POSwithnoden = ["CCONJ","PUNCT"]
-relswithnoden = ["cc","punct"]
+POSwithnoden = ["CCONJ","PUNCT","INTJ","SYM","PART","X","AUX"]
+relswithnoden = ["cc","punct","discourse",
+                    "vocative","clf","dep",
+                    "mark","expl","reparandum",
+                    "expl","expl:pass","aux:pass",
+                    "list","expl:pv","aux"]
 
 # This function takes a Token as input
 # and returns a new Token
