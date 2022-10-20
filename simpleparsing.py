@@ -141,13 +141,13 @@ def add_nulldeterminers(sentence):
     determinered = [sentence.filter(id=token['head'])[0] for token in sentence
                         if (token['upos']=='DET' and token['deprel']=='det')]
     determinerless = [token for token in sentence
-                        if (token['upos'] in ('NOUN','PROPN')
+                        if (token['upos'] in ('NOUN','PROPN','PRON')
                             and token not in determinered
                             and token['deprel'] != "amod")]
     for token in determinerless:
         sentence.append(conllu.models.Token({'id':token['id']-0.5,
-                            'form':'∅-def' if token['upos']=='PROPN' else '∅-indf',
-                            'lemma':'∅-def' if token['upos']=='PROPN' else '∅-indf',
+                            'form':'∅-def' if token['upos'] in ('PROPN','PRON') else '∅-indf',
+                            'lemma':'∅-def' if token['upos'] in ('PROPN','PRON') else '∅-indf',
                             'upos':'DET',
                             'xpos':None,
                             'feats':None,
@@ -169,12 +169,15 @@ def preprocess(sentence):
     return add_nulldeterminers(
                 flatten_relation_list(
                     flatten_relation_list(
-                        switch_propnflattoamod(
-                            sentence
+                        flatten_relation_list(
+                            switch_propnflattoamod(
+                                sentence
                             ),
                         'flat'
-                    ),
+                        ),
                     'compound'
+                    ),
+                'goeswith'
                 )
             )
 
@@ -188,6 +191,7 @@ postemplates = {
     "ADV":[(SemType.fromstring('(st)'),r'\x.([],[{}(x)])')],
     "NOUN":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
     "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[Name(x,{})])')],
+    "PRON":[(SemType.fromstring('(et)'),r'\x.([],[])')],
     "VERB":[(SemType.fromstring('((st)t)'),r'\H.(([e],[{}(e)]) + H(e))')],
     "PUNCT":[(SemType.fromstring('t'),r'([],[])')],
     "ADP":[(SemType.fromstring('(e(ut))'),r'\x.\y.([],[{}(y,x)])')],
@@ -202,10 +206,26 @@ relmeanings = {
             CompositeType(SemType.fromstring('((et)t)'),
             SemType.fromstring('((st)t)'))),
             DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Nsubj(x,y)])+H(x))))))'))],
+    "obl:agent":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Nsubj(x,y)])+H(x))))))'))],
     "obj":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('((et)t)'),
             SemType.fromstring('((st)t)'))),
             DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Obj(x,y)])+H(x))))))'))],
+    "nsubj:pass":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Obj(x,y)])+H(x))))))'))],
+    "iobj":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Iobj(x,y)])+H(x))))))'))],
+    "dislocated":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('((et)t)'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\G.\H.F((\x.G((\y.(([],[Topic(x,y)])+H(x))))))'))],
     "amod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
             DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))'))],
     "nummod":[(CompositeType(SemType.fromstring('(et)'),SemType.fromstring('((et)(et))')),
@@ -234,6 +254,10 @@ relmeanings = {
             CompositeType(SemType.fromstring('?'),
             SemType.fromstring('((st)t)'))),
             DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[Ccomp(x,p) p:z]) + H(x)))'))],
+    "csubj:pass":[(CompositeType(SemType.fromstring('((st)t)'),
+            CompositeType(SemType.fromstring('?'),
+            SemType.fromstring('((st)t)'))),
+            DrtExpression.fromstring(r'\F.\z.\H.F((\x.([p],[Ccomp(x,p) p:z]) + H(x)))'))],
     "csubj":[(CompositeType(SemType.fromstring('((st)t)'),
             CompositeType(SemType.fromstring('?'),
             SemType.fromstring('((st)t)'))),
@@ -245,12 +269,13 @@ relmeanings = {
 }
 
 # Some POS's and relations should be explicitly ignored.
-POSwithnoden = ["CCONJ","PUNCT","INTJ","SYM","PART","X","AUX"]
+POSwithnoden = ["CCONJ","PUNCT","INTJ","SYM","PART","X","AUX","SCONJ"]
 relswithnoden = ["cc","punct","discourse",
                     "vocative","clf","dep",
                     "mark","expl","reparandum",
                     "expl","expl:pass","aux:pass",
-                    "list","expl:pv","aux"]
+                    "list","expl:pv","aux",
+                    "appos","cop"]
 
 # This function takes a Token as input
 # and returns a new Token
@@ -271,6 +296,8 @@ def add_denotation(t):
         return t
     elif t['deprel'] in relmeanings.keys():
         t['rel_dens'] = relmeanings[t['deprel']]
+    elif ':' in t['deprel'] and t['deprel'].split(':')[0] in relmeanings.keys():
+        t['rel_dens'] = relmeanings[t['deprel'].split(':')[0]]
     else:
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
