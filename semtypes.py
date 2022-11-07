@@ -42,14 +42,16 @@ class SemType:
                 raise ValueError("{} is not a string corresponding to a SemType.".format(string))
 
 class AtomicType(SemType):
-    basictypes = ['e','s','t']
+    basictypes = ['e','s','t','j','b','i'] # j = subject, b = object, i = indirect object # TODO clean later
     unspecifiedatomic = 'u' # this is "like" any other atomic type
+    hierarchy = {'e':['j','b','i']} # any of these lower ones are "like" type e
 
     def __init__(self, content):
         SemType.__init__(self)
         self.atomic = True
         self.blank = False
-        if content in AtomicType.basictypes or content == AtomicType.unspecifiedatomic:
+        if (content in AtomicType.basictypes or
+                content == AtomicType.unspecifiedatomic):
             self.content = content
         else:
             raise ValueError("{} is not an appropriate atomic type.".format(content))
@@ -70,11 +72,15 @@ class AtomicType(SemType):
         return self.content
     
     def like(self,other):
-        if isinstance(other, self.__class__):
-            return (self.get_content() == AtomicType.unspecifiedatomic or
+        if isinstance(other, self.__class__): # TODO maybe add support for multi-level hierarchy?
+            if (self.get_content() == AtomicType.unspecifiedatomic or
                         other.get_content() == AtomicType.unspecifiedatomic or
-                        self.get_content() == other.get_content()
-                        )
+                        self.get_content() == other.get_content()):
+                return True
+            if (self.get_content() in AtomicType.hierarchy.keys() and other in AtomicType.hierarchy[self.get_content()]):
+                return True
+            if (other.get_content() in AtomicType.hierarchy.keys() and self in AtomicType.hierarchy[other.get_content()]):
+                return True
         else:
             return isinstance(other,SemType) and other.is_blank()
 
