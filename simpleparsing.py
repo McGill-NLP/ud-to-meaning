@@ -288,7 +288,7 @@ def add_denotation(t):
     if t['upos'] in POSwithnoden:
         return t
     elif t['upos'] in postemplates.keys():
-        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower())))
+        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower().replace("-","_"))))
                             for template in postemplates[t['upos']]]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
