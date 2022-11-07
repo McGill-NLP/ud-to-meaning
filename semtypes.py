@@ -77,10 +77,12 @@ class AtomicType(SemType):
                         other.get_content() == AtomicType.unspecifiedatomic or
                         self.get_content() == other.get_content()):
                 return True
-            if (self.get_content() in AtomicType.hierarchy.keys() and other in AtomicType.hierarchy[self.get_content()]):
+            elif (self.get_content() in AtomicType.hierarchy.keys() and other.get_content() in AtomicType.hierarchy[self.get_content()]):
                 return True
-            if (other.get_content() in AtomicType.hierarchy.keys() and self in AtomicType.hierarchy[other.get_content()]):
+            elif (other.get_content() in AtomicType.hierarchy.keys() and self.get_content() in AtomicType.hierarchy[other.get_content()]):
                 return True
+            else:
+                return False
         else:
             return isinstance(other,SemType) and other.is_blank()
 
