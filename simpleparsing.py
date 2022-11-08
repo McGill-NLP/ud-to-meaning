@@ -729,7 +729,7 @@ def simplifynodetyped(treenode, withtrace=False):
 # Turn a trace
 # (output as a denotation of a sentence, from simplifynodetyped with withtrace=True)
 # into a tree structure that pptree can print.
-def tracetotree(t, parent = None, withdrs = False):
+def tracetopptree(t, parent = None, withdrs = False):
     if len(t) == 2:
         name = f"{t[0]}:{t[1]}" if withdrs else str(t[0])
         return Node(name,parent) if parent else Node(name)
@@ -743,7 +743,7 @@ def tracetotree(t, parent = None, withdrs = False):
             for child in t[2]['children']:
                 relnodename = (f"{child[1][2]['deprel']}:" if len(child[1]) > 2 else "") + f"{child[0][0]}" + (f":{child[0][1]}" if (withdrs and child[0][1]) else "")
                 relnode = Node(relnodename,orignode)
-                childnode = tracetotree(child[1],relnode)
+                childnode = tracetopptree(child[1],relnode)
             return topnode
         else:
             # no children
@@ -755,4 +755,4 @@ def tracetotree(t, parent = None, withdrs = False):
 # Actually printing the trace.
 # TODO might be better to use print_tree2 rather than pptree, to preserve child order
 def printtrace(t, withdrs = False, horizontal = True):
-    print_tree(tracetotree(t,parent = None,withdrs = withdrs), horizontal = horizontal)
+    print_tree(tracetopptree(t,parent = None,withdrs = withdrs), horizontal = horizontal)
