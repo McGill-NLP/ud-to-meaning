@@ -25,8 +25,6 @@ class SemType:
     def __eq__(self,other):
         return self.__class__ == other.__class__
     
-    # TODO this needs to be fixed -
-    # it doesn't always choose a bracketing that will succeed...
     def fromstring(string):
         if len(string) == 1:
             if string == '?':
@@ -34,12 +32,25 @@ class SemType:
             else:
                 return AtomicType(string)
         else:
-            stringparse = re.search(r'^\(((.)|(\(.*\)))((.)|(\(.*\)))\)$',string)
-            if stringparse:
-                leftstring, rightstring = stringparse.group(1,4)
-                return CompositeType(SemType.fromstring(leftstring),SemType.fromstring(rightstring))
+            if string.startswith("(") and string.endswith(")"):
+                if string.startswith("(("): # string starts with a composite type
+                    if string.endswith("))"): # string ends with a composite type
+                        # now we go searching for where to split the string.
+                        parencount = 0
+                        for i in range(1,len(string)-2):
+                            if string[i] == '(':
+                                parencount += 1
+                            elif string[i] == ')':
+                                parencount -= 1
+                            if parencount == 0:
+                                return CompositeType(SemType.fromstring(string[1:i+1]),SemType.fromstring(string[i+1:-1]))
+                        raise ValueError("{} is not a string corresponding to a SemType (parentheses don't pair).".format(string))
+                    else: # string ends with an atomic type
+                        return CompositeType(SemType.fromstring(string[1:-2]),SemType.fromstring(string[-2]))
+                else: # string starts with an atomic type
+                    return CompositeType(SemType.fromstring(string[1:2]),SemType.fromstring(string[2:-1]))
             else:
-                raise ValueError("{} is not a string corresponding to a SemType.".format(string))
+                raise ValueError("{} is not a string corresponding to a SemType (no parentheses surrounding).".format(string))
 
 class AtomicType(SemType):
     basictypes = ['e','s','t','j','b','i'] # j = subject, b = object, i = indirect object # TODO clean later
