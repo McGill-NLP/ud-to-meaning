@@ -1,0 +1,14 @@
+# sent_id = GUM_conversation_grounded-30
+# addressee = Kitty
+# s_type = decl
+# speaker = Kendra
+# transition = continue
+# text = I'll have Melanie call you.
+1-2	I'll	_	_	_	_	_	_	_	_
+1	I	I	PRON	PRP	Case=Nom|Number=Sing|Person=1|PronType=Prs	3	nsubj	_	Discourse=joint-other_m:55->54:0|Entity=(4-person-giv:inact-cf2-1-ana)
+2	'll	will	AUX	MD	VerbForm=Fin	3	aux	_	_
+3	have	have	VERB	VB	VerbForm=Inf	0	root	_	_
+4	Melanie	Melanie	PROPN	NNP	Number=Sing	3	obj	_	Entity=(26-person-giv:act-cf1*-1-coref)
+5	call	call	VERB	VB	VerbForm=Inf	3	xcomp	_	_
+6	you	you	PRON	PRP	Case=Acc|Number=Sing|Person=2|PronType=Prs	5	obj	_	Entity=(10-person-giv:inact-cf3-1-ana)|SpaceAfter=No
+7	.	.	PUNCT	.	_	3	punct	_	_

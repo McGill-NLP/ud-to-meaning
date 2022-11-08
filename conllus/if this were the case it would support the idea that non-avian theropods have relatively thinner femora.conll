@@ -1,0 +1,23 @@
+# sent_id = GUM_academic_theropod-22-modified
+# s_type = sub
+# transition = smooth-shift
+# text = If this were the case, it would support the idea that non-avian theropods have relatively thinner femora.
+1	If	if	SCONJ	IN	_	5	mark	_	Discourse=contingency-condition:71->72:2
+2	this	this	PRON	DT	Number=Sing|PronType=Dem	5	nsubj	_	Entity=(117-abstract-giv:act-cf1*-1-coref)
+3	were	be	AUX	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	5	cop	_	_
+4	the	the	DET	DT	Definite=Def|PronType=Art	5	det	_	_
+5	case	case	NOUN	NN	Number=Sing	9	advcl	_	SpaceAfter=No
+6	,	,	PUNCT	,	_	5	punct	_	_
+7	it	it	PRON	PRP	Case=Nom|Gender=Neut|Number=Sing|Person=3|PronType=Prs	9	nsubj	_	Discourse=elaboration-additional:72->69:3|Entity=(117-abstract-giv:act-cf1*-1-ana)
+8	would	would	AUX	MD	VerbForm=Fin	9	aux	_	_
+9	support	support	VERB	VB	VerbForm=Inf	0	root	_	_
+10	the	the	DET	DT	Definite=Def|PronType=Art	11	det	_	Entity=(121-abstract-new-cf5-2-sgl
+11	idea	idea	NOUN	NN	Number=Sing	9	obj	_	_
+12	that	that	SCONJ	IN	_	15	mark	_	Discourse=elaboration-attribute:73->72:0
+13	non-avian	non-avian	ADJ	JJ	Degree=Pos|Polarity=Neg	14	amod	_	Entity=(87-animal-giv:inact-cf2-2-coref
+14	theropods	theropod	NOUN	NNS	Number=Plur	15	nsubj	_	Entity=87)
+15	have	have	VERB	VBP	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin	11	acl	_	_
+16	relatively	relatively	ADV	RB	Degree=Pos	17	advmod	_	Entity=(122-object-new-cf6-3-sgl
+17	thinner	thin	ADJ	JJR	Degree=Cmp	18	amod	_	_
+18	femora	femora	NOUN	NN	Number=Sing	15	obj	_	Entity=122)
+19	.	.	PUNCT	.	_	9	punct	_	_

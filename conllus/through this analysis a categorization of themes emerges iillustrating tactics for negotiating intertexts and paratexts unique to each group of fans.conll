@@ -1,0 +1,27 @@
+# sent_id = GUM_academic_thrones-21
+# s_type = decl
+# transition = establishment
+# text = Through this analysis, a categorization of themes emerges illustrating tactics for negotiating intertexts and paratexts unique to each group of fans.
+1	Through	through	ADP	IN	_	3	case	_	Discourse=joint-sequence_m:63->57:4
+2	this	this	DET	DT	Number=Sing|PronType=Dem	3	det	_	Entity=(2-abstract-giv:act-cf1*-2-coref
+3	analysis	analysis	NOUN	NN	Number=Sing	9	obl	_	Entity=2)|SpaceAfter=No
+4	,	,	PUNCT	,	_	3	punct	_	_
+5	a	a	DET	DT	Definite=Ind|PronType=Art	6	det	_	Entity=(135-abstract-new-cf3-2-sgl
+6	categorization	categorization	NOUN	NN	Number=Sing	9	nsubj	_	_
+7	of	of	ADP	IN	_	8	case	_	_
+8	themes	theme	NOUN	NNS	Number=Plur	6	nmod	_	Entity=(136-abstract-new-cf6-1-coref)135)
+9	emerges	emerge	VERB	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	0	root	_	_
+10	illustrating	illustrate	VERB	VBG	VerbForm=Ger	9	advcl	_	Discourse=elaboration-additional:64->63:0
+11	tactics	tactic	NOUN	NNS	Number=Plur	10	obj	_	Entity=(137-abstract-new-cf4-1-sgl
+12	for	for	SCONJ	IN	_	13	mark	_	Discourse=purpose-attribute:65->64:0
+13	negotiating	negotiate	VERB	VBG	VerbForm=Ger	11	acl	_	_
+14	intertexts	intertext	NOUN	NNS	Number=Plur	13	obj	_	Entity=(138-abstract-new-cf5-1-sgl)
+15	and	and	CCONJ	CC	_	16	cc	_	_
+16	paratexts	paratext	NOUN	NNS	Number=Plur	14	conj	_	Entity=(139-abstract-new-cf7-1-sgl)
+17	unique	unique	ADJ	JJ	Degree=Pos	14	amod	_	_
+18	to	to	ADP	IN	_	20	case	_	_
+19	each	each	DET	DT	PronType=Tot	20	det	_	Entity=(140-person-acc:aggr-cf2-2-coref|SplitAnte=111<140,113<140
+20	group	group	NOUN	NN	Number=Sing	17	obl	_	_
+21	of	of	ADP	IN	_	22	case	_	_
+22	fans	fan	NOUN	NNS	Number=Plur	20	nmod	_	Entity=140)137)|SpaceAfter=No
+23	.	.	PUNCT	.	_	9	punct	_	_

@@ -21,8 +21,10 @@ def print_sentence_and_parse(testconllu):
     withdens = conllu.TokenList([add_denotation(token) for token in preprocessed])
     # Then collapse all the nodes together!
     simplified = simplifynodetyped(withdens.to_tree())
-    for den in simplified.token['word_dens']:
-        den[1].pretty_print()
+    #for den in simplified.token['word_dens']:
+    #    den[1].pretty_print()
+    if simplified.token['word_dens']:
+        simplified.token['word_dens'][0][1].pretty_print()
 
 # basic transitive sentence
 # We read the file, and print its structure...
@@ -116,13 +118,55 @@ with open("conllus\\most iodine in food comes from seafood milk and salt.conll")
 print_sentence_and_parse(testconllu)
 
 
+# The coordination doesn't work anymore with the new denotations. This is something to fix.
 # coordinate structures with nouns and adjectives
 with open("conllus\\fraud and corruption prevent a fair and proper expression of the public voice.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
 
-
 # coordinate structures with verb phrases
 with open("conllus\\during the middle ages athens experienced a decline but re-emerged under byzantian rule.conll") as f:
     testconllu = f.read()
 print_sentence_and_parse(testconllu)
+
+# acl relation - relative clauses
+with open("conllus\\another contributory factor has been the decreasing consumption of iodized salt in foods.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# acl and advcl
+with open("conllus\\through this analysis a categorization of themes emerges iillustrating tactics for negotiating intertexts and paratexts unique to each group of fans.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# acl relation - clauses as complements of nouns, with advcl also
+with open("conllus\\if this were the case it would support the idea that non-avian theropods have relatively thinner femora.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# xcomp relation
+with open("conllus\\id like to go out to dinner though.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# xcomp relation with object-to-subject control
+with open("conllus\\ill have melanie call you.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# advcl relation
+with open("conllus\\therefore both institutes joined forces to develop a set of clinics on dh for librarians.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# advcl relation
+with open("conllus\\youre so stupid thinking I spent the night.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+
+# advcl relation and acl in a long sentence
+# note: this one is very slow.
+with open("conllus\\it is the oath created by senators when they tried the first impeachment of a president in 1868.conll") as f:
+    testconllu = f.read()
+print_sentence_and_parse(testconllu)
+

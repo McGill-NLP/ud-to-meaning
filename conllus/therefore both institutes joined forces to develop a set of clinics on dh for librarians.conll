@@ -1,0 +1,20 @@
+# sent_id = GUM_academic_librarians-9
+# s_type = decl
+# transition = smooth-shift
+# text = Therefore both institutes joined forces to develop a set of clinics on DH for librarians.
+1	Therefore	therefore	ADV	RB	Degree=Pos	4	advmod	_	Discourse=context-background:28->34:2
+2	both	both	DET	DT	PronType=Art	3	det	_	Entity=(50-event-new-cf5-3-disc(45-organization-giv:act-cf1*-2-coref
+3	institutes	institute	NOUN	NNS	Number=Plur	4	nsubj	_	Entity=45)
+4	joined	join	VERB	VBD	Mood=Ind|Number=Plur|Person=3|Tense=Past|VerbForm=Fin	0	root	_	_
+5	forces	force	NOUN	NNS	Number=Plur	4	obj	_	_
+6	to	to	PART	TO	_	7	mark	_	Discourse=purpose-goal:29->28:1
+7	develop	develop	VERB	VB	VerbForm=Inf	4	advcl	_	_
+8	a	a	DET	DT	Definite=Ind|PronType=Art	9	det	_	Entity=(1-place-giv:inact-cf3-2-coref
+9	set	set	NOUN	NN	Number=Sing	7	obj	_	_
+10	of	of	ADP	IN	_	11	case	_	_
+11	clinics	clinic	NOUN	NNS	Number=Plur	9	nmod	_	_
+12	on	on	ADP	IN	_	13	case	_	_
+13	DH	DH	PROPN	NNP	Abbr=Yes|Number=Sing	11	nmod	_	Entity=(2-abstract-giv:act-cf2-1-coref-Digital_humanities)
+14	for	for	ADP	IN	_	15	case	_	_
+15	librarians	librarian	NOUN	NNS	Number=Plur	11	nmod	_	Entity=(39-person-giv:inact-cf4-1-coref)1)50)|SpaceAfter=No
+16	.	.	PUNCT	.	_	4	punct	_	_

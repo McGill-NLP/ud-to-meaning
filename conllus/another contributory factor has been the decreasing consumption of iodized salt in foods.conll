@@ -1,0 +1,19 @@
+# sent_id = GUM_news_iodine-20
+# s_type = decl
+# transition = zero
+# text = Another contributory factor has been the decreasing consumption of iodised salt used in foods.
+1	Another	another	DET	DT	PronType=Art	3	det	_	Discourse=joint-list_m:52->46:3|Entity=(78-abstract-new-cf1-3-coref
+2	contributory	contributory	ADJ	JJ	Degree=Pos	3	amod	_	_
+3	factor	factor	NOUN	NN	Number=Sing	8	nsubj	_	Entity=78)
+4	has	have	AUX	VBZ	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin	8	aux	_	_
+5	been	be	AUX	VBN	Tense=Past|VerbForm=Part	8	cop	_	_
+6	the	the	DET	DT	Definite=Def|PronType=Art	8	det	_	Entity=(78-abstract-giv:act-cf1-3-coref
+7	decreasing	decrease	VERB	VBG	VerbForm=Ger	8	amod	_	_
+8	consumption	consumption	NOUN	NN	Number=Sing	0	root	_	_
+9	of	of	ADP	IN	_	11	case	_	_
+10	iodised	iodise	VERB	VBN	Tense=Past|VerbForm=Part	11	amod	_	Entity=(39-substance-giv:inact-cf2-2-coref
+11	salt	salt	NOUN	NN	Number=Sing	8	nmod	_	Entity=39)78)
+12	used	use	VERB	VBN	Tense=Past|VerbForm=Part	11	acl	_	Discourse=elaboration-attribute:53->52:0
+13	in	in	ADP	IN	_	14	case	_	_
+14	foods	food	NOUN	NNS	Number=Plur	12	obl	_	Entity=(47-substance-giv:inact-cf3-1-coref)|SpaceAfter=No
+15	.	.	PUNCT	.	_	8	punct	_	_
