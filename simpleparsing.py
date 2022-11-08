@@ -474,10 +474,11 @@ relmeanings = {
 POSwithnoden = ["CCONJ","PUNCT","INTJ","SYM","PART","X","AUX"]
 relswithnoden = ["cc","punct","discourse",
                     "vocative","clf","dep",
-                    "parataxis","expl","reparandum",
+                    "parataxis","reparandum",
                     "expl","expl:pass","aux:pass",
                     "list","expl:pv","aux",
-                    "appos","cop"]
+                    "appos","cop",
+                    "orphan","fixed"]
 
 # This function takes a Token as input
 # and returns a new Token
@@ -500,6 +501,8 @@ def add_denotation(t):
         t['rel_dens'] = relmeanings[t['deprel']]
     elif ':' in t['deprel'] and t['deprel'].split(':')[0] in relmeanings.keys():
         t['rel_dens'] = relmeanings[t['deprel'].split(':')[0]]
+    elif ':' in t['deprel'] and t['deprel'].split(':')[0] in relswithnoden:
+        return t
     else:
         print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
     return t
