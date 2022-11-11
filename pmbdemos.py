@@ -19,22 +19,72 @@ stanzanlp = stanza.Pipeline(lang='en',
 
 # This takes a raw clause format DRS (the type available in PMB data)
 # and outputs a DRS of the class from the DRT module.
-# TODO this does not work on DRS that contain other DRS yet.
 def clf_to_drs(clfraw):
     clflines = clfraw.split("\n")
     clflinesstripped = [x.split("%")[0].strip() for x in clflines]
     contentlines = [x for x in clflinesstripped if len(x) > 0]
-    minuspointers = [x[3:] for x in contentlines if not (x[-2] == 'b' and x[-1].isdigit())]
-    refs = []
-    conds = []
-    for statement in minuspointers:
-        if statement.startswith("REF "):
-            refs.append(statement[4:])
+    pointedlines = {}
+    pointerrelations = []
+    for x in contentlines:
+        if not (x[-2] == 'b' and x[-1].isdigit() and (not any(y.islower() for y in x[3:-3]))):
+            if x[:2] in pointedlines.keys():
+                pointedlines[x[:2]].append(x[3:])
+            else:
+                pointedlines[x[:2]] = [x[3:]]
         else:
-            stmtsplit = statement.split(' ')
-            argnames = [x for x in stmtsplit[1:] if not(x[1].isalpha() and x[2] == '.' and x[3:-1].isdigit())]
-            conds.append(stmtsplit[0] + "(" + ",".join(argnames) + ")")
-    return DrtExpression.fromstring("([" + ",".join(refs) + "],[" + ",".join(conds) + "])")
+            pointerrelations.append((x[:2],x[-2:],x[3:-3]))
+    pointedrefs = {}
+    pointedconds = {}
+    for pointer in pointedlines.keys():
+        pointedrefs[pointer] = []
+        pointedconds[pointer] = []
+        for statement in pointedlines[pointer]:
+            if statement.startswith("REF "):
+                pointedrefs[pointer].append(statement[4:])
+            else:
+                stmtsplit = statement.split(' ')
+                argnames = [x for x in stmtsplit[1:] if not (len(x) > 2 and x[1].isalpha() and x[2] == '.' and x[3:-1].isdigit())]
+                argnamesclean = [x.replace("+","more") for x in argnames]
+                pointedconds[pointer].append(stmtsplit[0] + "(" + ",".join(argnamesclean) + ")")
+    pointedboxes = {}
+    for pointer in pointedlines.keys():
+        pointedboxes[pointer] = DrtExpression.fromstring("([" + ",".join(pointedrefs[pointer]) + "],[" + ",".join(pointedconds[pointer]) + "])")
+    neglectedpointers = [x[0] for x in pointerrelations if x[0] not in pointedlines.keys()] + [x[1] for x in pointerrelations if x[1] not in pointedlines.keys()]
+    for pointer in neglectedpointers:
+        pointedboxes[pointer] = DrtExpression.fromstring("([],[])")
+    # For some reason, if one box presupposes another, they are written as one box.
+    presuppositionrels = [x for x in pointerrelations if x[2] == "PRESUPPOSITION"]
+    presuppositionrels.sort(key=lambda x:x[1])
+    otherboxrels = [x for x in pointerrelations if x[2] != "PRESUPPOSITION"]
+    presupcollapses = {}
+    for relation in presuppositionrels:
+        if relation[0] in pointedboxes.keys() and relation[1] in pointedboxes.keys():
+            if relation[1] in presupcollapses.keys():
+                presupcollapses[relation[1]].append(relation[0])
+            else:
+                presupcollapses[relation[1]] = [relation[0]]
+            pointedboxes[relation[1]] = (pointedboxes[relation[1]] + pointedboxes[relation[0]]).simplify()
+    # and update the relations we'll use to collapse boxes together too
+    for newlabel in presupcollapses.keys():
+        for oldlabel in presupcollapses[newlabel]:
+            if oldlabel in pointedboxes.keys():
+                del pointedboxes[oldlabel]
+            for i in range(len(otherboxrels)):
+                rel = otherboxrels[i]
+                if rel[0] == oldlabel:
+                    otherboxrels[i] = (newlabel,rel[1],rel[2])
+                elif rel[1] == oldlabel:
+                    otherboxrels[i] = (rel[0],newlabel,rel[2])
+    # Treat other box-level relations as subordinating one box to another.
+    otherboxrels.sort(key = lambda x:x[1], reverse=True)
+    for relation in otherboxrels:
+        if relation[0] in pointedboxes.keys() and relation[1] in pointedboxes.keys():
+            pointedboxes[relation[0]] = pointedboxes[relation[0]] + DrtExpression.fromstring("(["+ relation[1] + "],[" + relation[2] + "(" + relation[1] + "), " + relation[1] + ":" + str(pointedboxes[relation[1]]) + "])")
+            del pointedboxes[relation[1]]
+    finaldrs = DrtExpression.fromstring("([],[])")
+    for pointer in pointedboxes.keys():
+        finaldrs = finaldrs + pointedboxes[pointer]
+    return DrtExpression.fromstring(str(finaldrs.simplify()))
 
 # This function just makes demos easier.
 def compare_with_pmb(pmbpath, datapointpath, stanzanlp):
