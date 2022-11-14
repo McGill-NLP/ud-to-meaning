@@ -729,7 +729,7 @@ def simplifynodetyped(treenode, withtrace=False):
 
 # pass in a raw conllu or tokenlist
 # and get all of the denotations (or traces) computed for it
-def get_all_dens(rawconllu = None, tokenlist = None, withtrace = False):
+def getalldens(rawconllu = None, tokenlist = None, withtrace = False):
     if tokenlist is None:
         tokenlist=conllu.parse(rawconllu)[0]
     # Preprocess the sentence
