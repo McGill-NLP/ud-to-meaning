@@ -2,6 +2,7 @@
 from nltk.sem.drt import * # all the DRT things
 from nltk.sem.logic import unique_variable # helps for manipulating DRT expressions
 from pptree import Node # helps print traces nicely
+import graphviz # for displaying traces nicely
 from pptree import print_tree # helps print traces nicely
 import conllu # reading ConLL-U files
 import os # changing working directory
@@ -769,3 +770,38 @@ def tracetopptree(t, parent = None, withdrs = False):
 # TODO might be better to use print_tree2 rather than pptree, to preserve child order
 def printtrace(t, withdrs = False, horizontal = True):
     print_tree(tracetopptree(t,parent = None,withdrs = withdrs), horizontal = horizontal)
+
+
+# Turn a trace (as returned by simplifynodetyped) into a GraphViz directed graph
+# which can then be viewed, or styled, or whatever as desired.
+# The arguments counter, graph, and parentname are mainly for use within the recursive function calls.
+def tracetogvtree(t, counter = 0, graph = None, parentname = None):
+    if graph is None:
+        graph = graphviz.Digraph(node_attr={'shape': 'box','fontname':'Courier New'}, edge_attr={'dir':'back'})
+    topname = str(counter)
+    counter += 1
+    if len(t) < 3:
+        graph.node(topname, label=str(t))
+    elif len(t[2]['children']) == 0:
+        graph.node(topname, label = r'\n'.join([t[2]['form'], str(t[0]), t[1].pretty_format()]))
+    else:
+        graph.node(topname, label = r'\n'.join([t[2]['form'], "(final)", str(t[0]), t[1].pretty_format()]))
+        prevname = topname
+        for child in reversed(t[2]['children']):
+            childnodeden = child[1]
+            childrelden = child[0]
+            nextname = str(counter)
+            counter += 1
+            graph.node(nextname, shape='plaintext', label = str(childrelden[0].get_right().get_right()))
+            graph.edge(prevname, nextname)
+            prevname = nextname
+            _, counter = tracetogvtree(childnodeden, counter, graph, nextname)
+        bottomname = str(counter)
+        counter += 1
+        graph.node(bottomname, label = r'\n'.join([t[2]['form'],'(original)',str(t[2]['original'][0]),t[2]['original'][1].pretty_format()]))
+        graph.edge(nextname,bottomname)
+    if parentname is not None:
+        graph.edge(parentname, topname, label = (t[2]['deprel'] if len(t) > 2 else None))
+        return graph, counter
+    else:
+        return graph
