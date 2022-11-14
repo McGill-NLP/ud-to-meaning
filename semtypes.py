@@ -4,12 +4,16 @@ class SemType:
     def __init__(self):
         self.atomic = None
         self.blank = None
+        self.composite = None
 
     def is_atomic(self):
         return self.atomic
 
     def is_blank(self):
         return self.blank
+
+    def is_composite(self):
+        return self.composite
 
     def __repr__(self):
         return "<SemType "+str(self) + ">"
@@ -61,6 +65,7 @@ class AtomicType(SemType):
         SemType.__init__(self)
         self.atomic = True
         self.blank = False
+        self.composite = False
         if (content in AtomicType.basictypes or
                 content == AtomicType.unspecifiedatomic):
             self.content = content
@@ -96,6 +101,9 @@ class AtomicType(SemType):
                 return False
         else:
             return isinstance(other,SemType) and other.is_blank()
+    
+    def tuple_shaped_str(self):
+        return self.get_content()
 
 class CompositeType(SemType):
     def __init__(self,left,right):
@@ -106,6 +114,7 @@ class CompositeType(SemType):
             raise ValueError("{} - passed to right entry - is not a semantic type.".format(str(left)))
         self.atomic = False
         self.blank = False
+        self.composite = True
         self.left = left
         self.right = right
     
@@ -133,12 +142,28 @@ class CompositeType(SemType):
                         self.get_right().like(other.get_right()))
         else:
             return isinstance(other,SemType) and other.is_blank()
+    
+    def uncurried_signature(self):
+        if self.get_right().is_composite():
+            rightdomain, rightcodomain = self.get_right().uncurried_signature()
+            return [self.get_left()] + rightdomain, rightcodomain
+        else:
+            return [self.get_left()], self.get_right()
+    
+    def tuple_shaped_str(self):
+        domain, codomain = self.uncurried_signature()
+        if len(domain) == 1 and not domain[0].is_composite():
+            return domain[0].tuple_shaped_str() + "->" + str(codomain)
+        else:
+            return "(" + ",".join(x.tuple_shaped_str() for x in domain)+") -> " + str(codomain)
+
 
 # this is "like" any other type but only equal to other BlankTypes.
 class BlankType(SemType):
     def __init__(self):
         self.atomic = False
         self.blank = True
+        self.composite = False
 
     def __str__(self):
         return "?"
@@ -148,3 +173,6 @@ class BlankType(SemType):
 
     def like(self, other):
         return isinstance(other, SemType)
+    
+    def tuple_shaped_str(self):
+        return "?"

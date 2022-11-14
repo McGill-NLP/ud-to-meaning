@@ -783,22 +783,22 @@ def tracetogvtree(t, counter = 0, graph = None, parentname = None):
     if len(t) < 3:
         graph.node(topname, label=str(t))
     elif len(t[2]['children']) == 0:
-        graph.node(topname, label = r'\n'.join([t[2]['form'], str(t[0]), t[1].pretty_format()]))
+        graph.node(topname, label = r'\n'.join([t[2]['form'], t[0].tuple_shaped_str(), t[1].pretty_format()]))
     else:
-        graph.node(topname, label = r'\n'.join([t[2]['form'], "(final)", str(t[0]), t[1].pretty_format()]))
+        graph.node(topname, label = r'\n'.join([t[2]['form'], "(final)", t[0].tuple_shaped_str(), t[1].pretty_format()]))
         prevname = topname
         for child in reversed(t[2]['children']):
             childnodeden = child[1]
             childrelden = child[0]
             nextname = str(counter)
             counter += 1
-            graph.node(nextname, shape='plaintext', label = str(childrelden[0].get_right().get_right()))
+            graph.node(nextname, shape='plaintext', label = childrelden[0].get_right().get_right().tuple_shaped_str())
             graph.edge(prevname, nextname)
             prevname = nextname
             _, counter = tracetogvtree(childnodeden, counter, graph, nextname)
         bottomname = str(counter)
         counter += 1
-        graph.node(bottomname, label = r'\n'.join([t[2]['form'],'(original)',str(t[2]['original'][0]),t[2]['original'][1].pretty_format()]))
+        graph.node(bottomname, label = r'\n'.join([t[2]['form'],'(original)',t[2]['original'][0].tuple_shaped_str(),t[2]['original'][1].pretty_format()]))
         graph.edge(nextname,bottomname)
     if parentname is not None:
         graph.edge(parentname, topname, label = (t[2]['deprel'] if len(t) > 2 else None))
