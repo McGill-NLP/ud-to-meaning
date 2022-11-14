@@ -726,6 +726,19 @@ def simplifynodetyped(treenode, withtrace=False):
                                                     if relden[0].get_right().get_left().like(wordden[0])]
     return treenode
 
+# pass in a raw conllu or tokenlist
+# and get all of the denotations (or traces) computed for it
+def get_all_dens(rawconllu = None, tokenlist = None, withtrace = False):
+    if tokenlist is None:
+        tokenlist=conllu.parse(rawconllu)[0]
+    # Preprocess the sentence
+    preprocessed = preprocess(tokenlist)
+    # Then add semantic information to each node...
+    withdens = conllu.TokenList([add_denotation(token) for token in preprocessed])
+    # Then collapse all the nodes together!
+    simplified = simplifynodetyped(withdens.to_tree(), withtrace)
+    return simplified.token['word_dens']
+
 # Turn a trace
 # (output as a denotation of a sentence, from simplifynodetyped with withtrace=True)
 # into a tree structure that pptree can print.
