@@ -9,6 +9,9 @@ from simpleparsing import *
 # We read the file, and print its structure...
 with open("conllus\\the rider possesses the will.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -17,6 +20,9 @@ somedens[0][1].pretty_print()
 # adjectives and binarization
 with open("conllus\\the city enjoys a temperate climate.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -25,6 +31,9 @@ somedens[0][1].pretty_print()
 # quantifiers
 with open("conllus\\each section has a theme.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -33,6 +42,9 @@ somedens[0][1].pretty_print()
 # obliques!
 with open("conllus\\the first drops fell onto the parched stones from a cloudless blue sky.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -41,6 +53,9 @@ somedens[0][1].pretty_print()
 # nominal modifiers
 with open("conllus\\after a brief period in frankfurt the family moved to basel.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -49,14 +64,20 @@ somedens[0][1].pretty_print()
 # determinerless nouns!
 with open("conllus\\the first drops of rain fell onto the parched stones from a cloudless blue sky.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
-#tracetogvtree(somedens[0]).view()
+tracetogvtree(somedens[0]).view()
 
 
 # determinerless nouns!
 with open("conllus\\pages hung in tatters from the sodden blue spine.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -65,6 +86,9 @@ somedens[0][1].pretty_print()
 # determinerless nouns!
 with open("conllus\\successful stormtroopers share a high - five.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -73,6 +97,9 @@ somedens[0][1].pretty_print()
 # determinerless nouns and numbers!
 with open("conllus\\smith offered three reasons.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -81,6 +108,9 @@ somedens[0][1].pretty_print()
 # proper nouns as det+noun, allowing them to be modified!
 with open("conllus\\after a brief period in frankfurt the family moved to basel in switzerland.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -89,6 +119,9 @@ somedens[0][1].pretty_print()
 # flat constructions!
 with open("conllus\\wikinews interviews meteorological experts on cyclone phalin.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -97,6 +130,9 @@ somedens[0][1].pretty_print()
 # flat and compound constructions, with special case for proper nouns
 with open("conllus\\texas student ahmed mohamed inspires social movement.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -106,6 +142,9 @@ somedens[0][1].pretty_print()
 # note that the answer does not simplify because of the band-aid on the DRT module
 with open("conllus\\the authors say the results confirm the existence of inadequate iodine intake in the australian population.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -114,6 +153,9 @@ somedens[0][1].pretty_print()
 # csubj and ccomp
 with open("conllus\\ending inflation means freeing all americans from the terror of runaway living costs.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -122,6 +164,9 @@ somedens[0][1].pretty_print()
 # coordinate structures with nouns
 with open("conllus\\most iodine in food comes from seafood milk and salt.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -131,6 +176,9 @@ somedens[0][1].pretty_print()
 # coordinate structures with nouns and adjectives
 with open("conllus\\fraud and corruption prevent a fair and proper expression of the public voice.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -138,6 +186,9 @@ somedens[0][1].pretty_print()
 # coordinate structures with verb phrases
 with open("conllus\\during the middle ages athens experienced a decline but re-emerged under byzantian rule.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -145,6 +196,9 @@ somedens[0][1].pretty_print()
 # acl relation - relative clauses
 with open("conllus\\another contributory factor has been the decreasing consumption of iodized salt in foods.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -152,6 +206,9 @@ somedens[0][1].pretty_print()
 # acl and advcl
 with open("conllus\\through this analysis a categorization of themes emerges iillustrating tactics for negotiating intertexts and paratexts unique to each group of fans.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -159,6 +216,9 @@ somedens[0][1].pretty_print()
 # acl relation - clauses as complements of nouns, with advcl also
 with open("conllus\\if this were the case it would support the idea that non-avian theropods have relatively thinner femora.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -166,6 +226,9 @@ somedens[0][1].pretty_print()
 # xcomp relation
 with open("conllus\\id like to go out to dinner though.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -173,6 +236,9 @@ somedens[0][1].pretty_print()
 # xcomp relation with object-to-subject control
 with open("conllus\\ill have melanie call you.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -180,6 +246,9 @@ somedens[0][1].pretty_print()
 # advcl relation
 with open("conllus\\therefore both institutes joined forces to develop a set of clinics on dh for librarians.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -187,6 +256,9 @@ somedens[0][1].pretty_print()
 # advcl relation
 with open("conllus\\youre so stupid thinking I spent the night.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
@@ -195,6 +267,9 @@ somedens[0][1].pretty_print()
 # note: this one is very slow.
 with open("conllus\\it is the oath created by senators when they tried the first impeachment of a president in 1868.conll") as f:
     testconllu = f.read()
+for x in testconllu.split('\n'):
+    if x.startswith('# text'):
+        print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
 #tracetogvtree(somedens[0]).view()
