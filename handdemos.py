@@ -69,7 +69,7 @@ for x in testconllu.split('\n'):
         print(x)
 somedens = getalldens(rawconllu=testconllu,withtrace=True)
 somedens[0][1].pretty_print()
-tracetogvtree(somedens[0]).view()
+# tracetogvtree(somedens[0]).view()
 
 
 # determinerless nouns!
