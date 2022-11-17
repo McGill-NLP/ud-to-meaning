@@ -665,14 +665,6 @@ def simplifynodetyped(treenode, withtrace=False):
                 usefulchilddens = [den
                                     for den in child.token['word_dens']
                                     if den[0].like(childrelden[0].get_right().get_left())]
-                # TODO The next line is a hack; really should fix the DrtExpression code directly.
-                if withtrace:
-                    usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True),den[2])
-                                        for den in usefulchilddens]
-                else:
-                    usefulchilddens = [(den[0],den[1].replace(DrtExpression.fromstring('x').variable,DrtVariableExpression(unique_variable()),True))
-                                        for den in usefulchilddens]
-                # Treat conjunctions separately - it isn't computed as an ordinary lambda expression.
                 if child.token['deprel'] == 'conj':
                     if withtrace:
                         newnodedens = [(childden[0],
