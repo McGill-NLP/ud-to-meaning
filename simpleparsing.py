@@ -60,7 +60,7 @@ def reindex_tokenlist(sentence):
     i = 0
     for token in sentence:
         i += 1
-        if not token['misc']:
+        if 'misc' not in token.keys() or not token['misc']:
             token['misc'] = {}
         token['misc'].update(oldid = token['id'])
         token['id'] = i
