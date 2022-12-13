@@ -505,7 +505,7 @@ def add_denotation(t):
     elif ':' in t['deprel'] and t['deprel'].split(':')[0] in relswithnoden:
         return t
     else:
-        print("The relation {} on the word with ID {} is a relation with unknown denotation.".format(t['deprel'],str(t['id'])))
+        print("The relation {} on the word {} with ID {} is a relation with unknown denotation.".format(t['deprel'], t['form'], str(t['id'])))
     return t
 
 # This function computes the conjunction (in an essentially Lasersohn way) of two lambda-expressions
@@ -693,7 +693,7 @@ def simplifynodetyped(treenode, withtrace=False):
             nodedens = nodedens + newnodedens
         treenode.token['word_dens'] = nodedens
     elif iopairs:
-        print("There was a problem in binarizing children of node {}".format(treenode.token['id']))
+        print("There was a problem in binarizing children of node {} ({})".format(treenode.token['id'], treenode.token['form']))
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
     # so we have to update its semantic type after simplifying this node.
