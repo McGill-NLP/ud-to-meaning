@@ -191,7 +191,7 @@ postemplates = {
     "ADJ":[(SemType.fromstring('(e(st))'),r'\x.\y.([],[Attribute(x,y),{}(y)])')],
     "ADV":[(SemType.fromstring('(st)'),r'\x.([],[{}(x)])')],
     "NOUN":[(SemType.fromstring('(et)'),r'\x.([],[{}(x)])')],
-    "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[Name(x,{})])')],
+    "PROPN":[(SemType.fromstring('(et)'),r'\x.([],[Name(x,"{}")])')],
     "PRON":[(SemType.fromstring('(et)'),r'\x.([],[])')],
     "VERB":[(SemType.fromstring('(j(st))'),r'\x.\y.([],[{}(y),Arg1(y,x)])'),
         (SemType.fromstring('(j(b(st)))'),r'\x.\y.\z.([],[{}(z),Arg1(z,x),Arg2(z,y)])'),
@@ -492,7 +492,7 @@ def add_denotation(t):
     if t['upos'] in POSwithnoden:
         return t
     elif t['upos'] in postemplates.keys():
-        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower().replace("-","_"))))
+        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower().replace("-","_").replace("exist","exst").replace(".","").replace("all","alll"))))
                             for template in postemplates[t['upos']]]
     else:
         print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
@@ -518,7 +518,7 @@ def add_denotation(t):
 def compute_conj(den1, den2, semtype):
     # There's a special proviso for semantic types ((et)t) and ((st)t)
     if semtype.like(SemType.fromstring('((ut)t)')):
-        conjden = DrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[partof(y,x)]))) + G((\y.([],[partof(y,x)]))))')
+        conjden = DrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[Sub(y,x)]))) + G((\y.([],[Sub(y,x)]))))')
         return conjden(den1)(den2).simplify()
     # Deal with atomic types first
     if semtype == SemType.fromstring('t'):
@@ -536,7 +536,7 @@ def compute_conj(den1, den2, semtype):
         x = DrtVariableExpression(unique_variable())
         xstr = str(x)
         recursivecallstr = str(compute_conj(den1(a).simplify(),den2(b).simplify(),semtype.get_right()))
-        return DrtExpression.fromstring(rf'\{xstr}.({recursivecallstr}+([{astr} {bstr}],[partof({astr},{xstr}) partof({bstr},{xstr})]))').simplify()
+        return DrtExpression.fromstring(rf'\{xstr}.({recursivecallstr}+([{astr} {bstr}],[Sub({astr},{xstr}) Sub({bstr},{xstr})]))').simplify()
     else:
         x = DrtVariableExpression(unique_variable())
         xstr = str(x)
