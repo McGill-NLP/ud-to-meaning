@@ -11,23 +11,10 @@ import sys # for turning off printing when running counter
 import io # for turning off printing when running counter
 import csv # writing csvs
 
-# MARK This part sets up the NLP pipeline we will need to get UD parses.
+# This part sets up the NLP pipeline we will need to get UD parses.
 stanzanlp = stanza.Pipeline(lang='en',
                 processors = 'tokenize,pos,lemma,depparse',
                 tokenize_pretokenized=True)
-
-# MARK Where to find PMB and where to write output
-pmbdir = "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold"
-myoutdir = "..\\..\\..\\Downloads\\testing-outfiles"
-computeddrsdir = myoutdir 
-resultsfile = "latestresults.csv" # This path is computed from the working directory not the myoutdir
-
-
-pmbfiles = []
-for path, _, files in os.walk(pmbdir):
-    pmbfiles = pmbfiles + [path + '\\' + x for x in files]
-datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
-datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles)
 
 # Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
 # It takes as input a condition from the DRT module, the name of the projective DRS it belongs to,
@@ -227,93 +214,118 @@ def simplify_clf(clflines):
     # TODO Flatten all PRESUPPOSITION relations
     return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
 
-# Make the output directory.
-if not os.path.exists(myoutdir):
-    os.mkdir(myoutdir)
-csvrows = []
-i = 0
-# Process and evaluate each datapoint in turn.
-for dpname in datapointpathdict.keys():
-    print(dpname)
-    # There are certain individual PMB files that give it trouble; these are currently tracked here.
-    if dpname in ("..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p04\\d2024\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p14\\d3314\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p19\\d1455\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p23\\d2513\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p39\\d2847\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p49\\d1795\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p50\\d0704\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p59\\d3229\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p74\\d0808\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p75\\d3043\\en",
-                    "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p80\\d0554\\en"):
-        continue
-    # This bit of code lets you set certain indices to skip over
-    if i > -1:
-        i+=1
-    else:
-        i+=1
-        continue
-    # Save intermediate results in case the function encounters an issue.
-    if i % 100 == 0:
-        with open(f"interimresults-{i}.csv", 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore'])
-            nlines = writer.writeheader()
-            for row in csvrows:
-                nlines = writer.writerow(row)
-    try:
-        # read the token file and convert to meaning my way
-        with open(datapointpathdict[dpname]['tokens']) as f:
-            tokensraw = f.read()
-        tokens = ['~'.join(x.split(' ')[3:]) for x in tokensraw.split('\n') if len(x) > 0]
-        ud_dict = stanzanlp([tokens]).to_dict()[0]
-        for x in ud_dict:
-            x['form'] = x['text']
-        if not os.path.exists(myoutdir+'\\'+dpname.replace('\\','-')):
-            os.mkdir(myoutdir+'\\'+dpname.replace('\\','-'))
-        ud_parse = conllu.TokenList(ud_dict)
-        # UD parse to an output file, for testing
-        ud_out = ud_parse.serialize()
-        with open(myoutdir+'\\'+dpname.replace('\\','-')+'\\'+'udparse.conll',mode='w') as f:
-            nlines = f.write(ud_out)
-        # DRSs to an output file, for testing
-        ud_drss = getalldens(tokenlist=ud_parse)
-        clflines = [to_clf(den) for semtype,den in ud_drss if isinstance(den,DRS)]
-        with open(myoutdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutput.clf', 'w') as f:
-            nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
-        # change both of them to simplified files
-        with open(myoutdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutputsimple.clf', 'w') as f:
-            nlines = f.write('\n\n'.join(['\n'.join(simplify_clf(x)) for x in clflines]))
-        pmbclf = ''
-        with open(datapointpathdict[dpname]['drs']) as f:
-            pmbclf = f.read()
-        pmbclflines = pmbclf.split('\n')
-        simplifiedpmbname = '.'.join(datapointpathdict[dpname]['drs'].split('.')[:-2] + [datapointpathdict[dpname]['drs'].split('.')[-1]+"simple.clf"])
-        with open(simplifiedpmbname, 'w') as f:
-            nlines = f.write('\n'.join(simplify_clf(pmbclflines)))
-        # put all of this through Counter
-        text_trap = io.StringIO()
-        sys.stdout = text_trap
-        myargs = build_counter_args(simplifiedpmbname,
-                                    myoutdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutputsimple.clf',
-                                    ill='score',
-                                    baseline=True)
+# Loops through all DRS files in the passed folder, and writes output files in the passed outdir.
+# Also returns a list of pairs of one PMB file and one DRS file.
+def pmb_files_to_meaning(pmbdir, outdir):
+    pmbfiles = []
+    for path, _, files in os.walk(pmbdir):
+        pmbfiles = pmbfiles + [path + '\\' + x for x in files]
+    datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
+    datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles)
+    
+    # Make the output directory.
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+    returnlist = []
+    
+    i = 0
+    # We'll process each datapoint in turn.
+    for dpname in datapointpathdict.keys():
+        print(dpname)
+        # There are certain individual PMB files that give it trouble; these are currently tracked here.
+        if dpname in ("..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p04\\d2024\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p14\\d3314\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p19\\d1455\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p23\\d2513\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p39\\d2847\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p49\\d1795\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p50\\d0704\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p59\\d3229\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p74\\d0808\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p75\\d3043\\en",
+                        "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p80\\d0554\\en"):
+            continue
+        # This bit of code lets you set certain indices to skip over
+        if i > -1:
+            i+=1
+        else:
+            i+=1
+            continue
         try:
-            ans = counter.main(myargs)
-            scores = [counter.compute_f(items[0], items[1], items[2], myargs.significant, False) for items in ans]
-        except ValueError:
-            scores = [('NA','NA','NA')]
-        sys.stdout = sys.__stdout__
-        counteroutput = text_trap.getvalue()
-        # get the best score to write down - we're doing oracle accuracy.
-        bestscore = max(scores,key=lambda x:x[2])
-        csvrows.append({'Datapoint':dpname,'Recall':bestscore[0],'Precision':bestscore[1],'FScore':bestscore[2]})
-    except Exception as e:
-        print(e)
-        csvrows.append({'Datapoint':dpname,'Precision':'NA','Recall':'NA','FScore':'NA'})
-# write csv
-with open(resultsfile, 'w', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore'])
-    nlines = writer.writeheader()
-    for row in csvrows:
-        nlines = writer.writerow(row)
+            # read the token file
+            with open(datapointpathdict[dpname]['tokens']) as f:
+                tokensraw = f.read()
+            tokens = ['~'.join(x.split(' ')[3:]) for x in tokensraw.split('\n') if len(x) > 0]
+            ud_dict = stanzanlp([tokens]).to_dict()[0]
+            for x in ud_dict:
+                x['form'] = x['text']
+            if not os.path.exists(outdir+'\\'+dpname.replace('\\','-')):
+                os.mkdir(outdir+'\\'+dpname.replace('\\','-'))
+            ud_parse = conllu.TokenList(ud_dict)
+            # UD parse to an output file, for testing
+            ud_out = ud_parse.serialize()
+            with open(myoutdir+'\\'+dpname.replace('\\','-')+'\\'+'udparse.conll',mode='w') as f:
+                nlines = f.write(ud_out)
+            # DRSs to an output file
+            ud_drss = getalldens(tokenlist=ud_parse)
+            clflines = [to_clf(den) for semtype,den in ud_drss if isinstance(den,DRS)]
+            with open(outdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutput.clf', 'w') as f:
+                nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
+            # change both of them to simplified files
+            with open(outdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutputsimple.clf', 'w') as f:
+                nlines = f.write('\n\n'.join(['\n'.join(simplify_clf(x)) for x in clflines]))
+            pmbclf = ''
+            with open(datapointpathdict[dpname]['drs']) as f:
+                pmbclf = f.read()
+            pmbclflines = pmbclf.split('\n')
+            simplifiedpmbname = '.'.join(datapointpathdict[dpname]['drs'].split('.')[:-2] + [datapointpathdict[dpname]['drs'].split('.')[-1]+"simple.clf"])
+            with open(simplifiedpmbname, 'w') as f:
+                nlines = f.write('\n'.join(simplify_clf(pmbclflines)))
+            returnlist.append((simplifiedpmbname,outdir+'\\'+dpname.replace('\\','-')+'\\'+'drsoutputsimple.clf'))
+        except Exception as e:
+            continue
+
+    return returnlist
+
+def score_computed_drss(pmbdrslist,resultsfile):
+    csvrows = []
+    # Evaluate each datapoint in turn.
+    for datapoint in pmbdrslist:
+        print(datapoint[1])
+        try:
+            text_trap = io.StringIO()
+            sys.stdout = text_trap
+            myargs = build_counter_args(datapoint[0],
+                                        datapoint[1],
+                                        ill='score',
+                                        baseline=True)
+            try:
+                ans = counter.main(myargs)
+                scores = [counter.compute_f(items[0], items[1], items[2], myargs.significant, False) for items in ans]
+            except ValueError:
+                scores = [('NA','NA','NA')]
+            sys.stdout = sys.__stdout__
+            counteroutput = text_trap.getvalue()
+            # get the best score to write down - we're doing oracle accuracy.
+            bestscore = max(scores,key=lambda x:x[2])
+            csvrows.append({'Datapoint':datapoint[1],'Recall':bestscore[0],'Precision':bestscore[1],'FScore':bestscore[2]})
+        except Exception as e:
+            print(e)
+            csvrows.append({'Datapoint':datapoint[1],'Precision':'NA','Recall':'NA','FScore':'NA'})
+
+    # write csv
+    with open(resultsfile, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore'])
+        nlines = writer.writeheader()
+        for row in csvrows:
+            nlines = writer.writerow(row)
+
+    return csvrows
+
+pmbdir = "pmb-gold-english"
+myoutdir = "results"
+resultsfile = "results\\latestresults.csv" # This path is computed from the working directory not the myoutdir
+
+drspairs = pmb_files_to_meaning(pmbdir, myoutdir)
+
+csvrows = score_computed_drss(drspairs,resultsfile)
