@@ -13,8 +13,9 @@ import csv # writing csvs
 
 # This part sets up the NLP pipeline we will need to get UD parses.
 stanzanlp = stanza.Pipeline(lang='en',
-                processors = 'tokenize,pos,lemma,depparse',
-                tokenize_pretokenized=True)
+                processors = 'tokenize,pos,lemma,depparse'
+)
+#                tokenize_pretokenized=True)
 
 # Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
 # It takes as input a condition from the DRT module, the name of the projective DRS it belongs to,
@@ -221,7 +222,7 @@ def pmb_files_to_meaning(pmbdir, outdir):
     for path, _, files in os.walk(pmbdir):
         pmbfiles = pmbfiles + [path + '\\' + x for x in files]
     datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
-    datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles)
+    datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off','raw':x+'.raw'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles and x+'.raw' in pmbfiles)
     
     # Make the output directory.
     if not os.path.exists(outdir):
@@ -246,7 +247,7 @@ def pmb_files_to_meaning(pmbdir, outdir):
                         "..\\..\\..\\Downloads\\pmb-4.0.0\\data\\en\\gold\\p80\\d0554\\en"):
             continue
         # This bit of code lets you set certain indices to skip over
-        if i > -1:
+        if i < 10:
             i+=1
         else:
             i+=1
@@ -255,8 +256,10 @@ def pmb_files_to_meaning(pmbdir, outdir):
             # read the token file
             with open(datapointpathdict[dpname]['tokens']) as f:
                 tokensraw = f.read()
+            with open(datapointpathdict[dpname]['raw']) as f:
+                textraw = f.read()
             tokens = ['~'.join(x.split(' ')[3:]) for x in tokensraw.split('\n') if len(x) > 0]
-            ud_dict = stanzanlp([tokens]).to_dict()[0]
+            ud_dict = stanzanlp(textraw).to_dict()[0]
             for x in ud_dict:
                 x['form'] = x['text']
             if not os.path.exists(outdir+'\\'+dpname.replace('\\','-')):

@@ -1,7 +1,7 @@
 import os # changing working directory
 import conllu # reading ConLL-U files and working with the resulting data representation
 from nltk.sem.drt import * # working with DRS structures
-import stanza # parsing to UD
+import stanza # parsing to UD # MAKE IT STANZA VERSION 1.4.0; 1.4.2 didn't work
 os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 # the modules we need should be in the working directory now, and the pmb files.
 from semtypes import *
@@ -12,10 +12,8 @@ from simpleparsing import *
 #####       You can get them yourself and change the pmbpath below.
 
 # The NLP pipeline we will use to parse to UD
-stanzanlp = stanza.Pipeline(lang='en',
-                processors = 'tokenize,mwt,pos,lemma,depparse',
-                tokenize_pretokenized=True,
-                download_method=stanza.DownloadMethod.REUSE_RESOURCES)
+stanza.download(lang='en', processors='tokenize,pos,lemma,depparse')
+stanzanlp = stanza.Pipeline(lang='en', processors = 'tokenize,pos,lemma,depparse')
 
 # This takes a raw clause format DRS (the type available in PMB data)
 # and outputs a DRS of the class from the DRT module.
@@ -240,17 +238,13 @@ def compare_with_pmb(pmbpath, datapointpath, stanzanlp, simplified=False):
         datapointraw = f.read()
     print(datapointraw)
 
-    with open(pmbpath + datapointpath + r"\en.tok.off") as f:
-        tokensraw = f.read()
-    tokens = ['~'.join(x.split(' ')[3:]) for x in tokensraw.split('\n') if len(x) > 0]
-
     with open(pmbpath + datapointpath + r"\en.drs.clf") as f:
         drsclfraw = f.read()
 
     pmb_drs = strip_tense_and_theta(clf_to_drs_no_propnouns(drsclfraw)) if simplified else clf_to_drs(drsclfraw)
 
     # Now we parse the tokens in UD, so we can use the UD-to-meaning parser.
-    doc = stanzanlp([tokens])
+    doc = stanzanlp(datapointraw)
 
     ud_dict = doc.to_dict()[0]
     for x in ud_dict:
