@@ -1,0 +1,28 @@
+ADJ	(e(st))	\x.\y.([],[Attribute(x,y),{}(y)])
+ADV	(s(st))	\x.\y.([],[Manner(x,y),{}(y)])
+NOUN	(et)	\x.([],[{}(x)])
+PROPN	(et)	\x.([],[Name(x,"{}")])
+PRON	(et)	\x.([],[])
+VERB	(j(st))	\x.\y.([],[{}(y),Arg1(y,x)])
+VERB	(j(b(st)))	\x.\y.\z.([],[{}(z),Arg1(z,x),Arg2(z,y)])
+VERB	(j(b(i(st))))	\x.\y.\z.\w.([],[{}(w),Arg1(w,x),Arg2(w,y),Arg3(w,z)])
+VERB	(j(b(s(st))))	\x.\y.\z.\w.([],[{}(w),Arg1(w,x),Arg2(w,y),Arg3(w,z)])
+VERB	(j(b(t(st))))	\x.\y.\z.\w.([u],[{}(w),Arg1(w,x),Arg2(w,u),u:z])
+VERB	(j(s(st)))	\x.\y.\z.([],[{}(z),Arg1(z,x),Arg2(z,y)])
+VERB	(j(t(st)))	\x.\y.\z.([u],[{}(z),Arg1(z,x),Arg2(z,u),u:y])
+VERB	(j(i(t(st))))	\x.\y.\z.\w.([u],[{}(w),Arg1(w,x),Arg2(w,u),Arg3(w,y),u:z])
+ADP	(e(et))	\x.\y.([],[{}(y,x)])
+ADP	(e(st))	\x.\y.([],[{}(y,x)])
+NUM	(et)	\x.([],[Number(x,{})])
+NUM	((et)t)	\F.(([x],[Name(x,{})]) + F(x))
+DET	((et)((et)t))	\F.\G.(([x],[]) + F(x) + G(x))
+SCONJ	(e(tt))	\x.\y.([u],[{}(x,u),u:y])
+SCONJ	(s(st))	\x.\y.([],[{}(x,y)])
+SCONJ	(t(tt))	\x.\y.([u,v],[{}(u,v),u:x,v:y])
+CCONJ	NA	NA
+PUNCT	NA	NA
+INTJ	NA	NA
+SYM	NA	NA
+PART	NA	NA
+X	NA	NA
+AUX	NA	NA
