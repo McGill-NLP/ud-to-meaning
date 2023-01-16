@@ -80,15 +80,23 @@ def reindex_tokenlist(sentence):
 # but it changes any "flat" dependency relations
 # with head a NOUN and dependent a PROPN
 # into "nmod"...
+# or into "flat" dependent on a previous PROPN
+# if there are multiple on the same NOUN
 # ... it just makes the denotations come out nicer.
 # It takes a TokenList as input,
 # and returns a new TokenList with the change.
 def switch_propnflattonmod(sentence):
     sentence = copy.deepcopy(sentence)
+    seenheads = {}
     for token in sentence:
         if token['upos'] == 'PROPN' and token['deprel'] == 'flat':
             if sentence.filter(id=token['head'])[0]['upos'] == 'NOUN':
-                token['deprel'] = 'nmod'
+                if token['head'] in seenheads.keys():
+                    token['head'] = seenheads[token['head']]
+                else:
+                    token['deprel'] = 'nmod'
+                    seenheads[token['head']] = token['id']
+                    token['upos'] = 'PROPN-MOD'
     return sentence
 
 # This function flattens a given relation.
