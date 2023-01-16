@@ -98,17 +98,17 @@ def evaluate_clfs(filepairs):
                                         baseline=True)
             try:
                 ans = counter.main(myargs)
-                scores = [counter.compute_f(items[0], items[1], items[2], myargs.significant, False) for items in ans]
+                scores = [(counter.compute_f(items[0], items[1], items[2], myargs.significant, False),items[-1]) for items in ans]
             except ValueError:
-                scores = [('NA','NA','NA')]
+                scores = [(('NA','NA','NA'),'NA')]
             sys.stdout = sys.__stdout__
             counteroutput = text_trap.getvalue()
             # get the best score to write down - we're doing oracle accuracy.
-            bestscore = max(scores,key=lambda x:x[2])
-            evalresults.append({'Datapoint':datapoint[1],'Recall':bestscore[0],'Precision':bestscore[1],'FScore':bestscore[2]})
+            bestscore = max(scores,key=lambda x:x[0][2])
+            evalresults.append({'Datapoint':datapoint[1],'Recall':bestscore[0][0],'Precision':bestscore[0][1],'FScore':bestscore[0][2],'LongResults':bestscore[1]})
         except Exception as e:
             print(e)
-            evalresults.append({'Datapoint':datapoint[1],'Precision':'NA','Recall':'NA','FScore':'NA'})
+            evalresults.append({'Datapoint':datapoint[1],'Precision':'NA','Recall':'NA','FScore':'NA','LongResults':'NA'})
     # TODO multiprocessing goes here
     return evalresults
 
