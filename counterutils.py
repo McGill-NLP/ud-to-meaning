@@ -6,6 +6,8 @@ from argparse import Namespace # to make arguments for counter
 import time # part of a function taken from counter
 import sys # for turning off printing when running counter
 import io # for turning off printing when running counter
+from multiprocessing import Process, Manager, freeze_support
+from queue import Empty as EmptyException
 
 # This simply helps to pass arguments to Counter, since Counter expects command line arguments.
 # Most of the code in this function is taken from the Counter code itself and is not mine.
@@ -83,15 +85,11 @@ def build_counter_args(f1, f2,
         raise NotImplementedError('Partial matching currently does not work')
     return args
 
-# Just pass it the input and output files to test, it will return all the results.
-def evaluate_clfs(filepairs):
-    evalresults = []
-    # Evaluate each datapoint in turn.
-    for datapoint in filepairs:
-        print(datapoint[1])
+# TODO might be more elegant to use Pools in the future.
+def evaluate_clf_proc(queue,list):
+    while True:
         try:
-            text_trap = io.StringIO()
-            sys.stdout = text_trap
+            datapoint = queue.get_nowait()
             myargs = build_counter_args(datapoint[0],
                                         datapoint[1],
                                         ill='score',
@@ -101,18 +99,32 @@ def evaluate_clfs(filepairs):
                 scores = [(counter.compute_f(items[0], items[1], items[2], myargs.significant, False),items[-1]) for items in ans]
             except ValueError:
                 scores = [(('NA','NA','NA'),'NA')]
-            sys.stdout = sys.__stdout__
-            counteroutput = text_trap.getvalue()
             # get the best score to write down - we're doing oracle accuracy.
             bestscore = max(scores,key=lambda x:x[0][2])
-            evalresults.append({'Datapoint':datapoint[1],'Recall':bestscore[0][0],'Precision':bestscore[0][1],'FScore':bestscore[0][2],'LongResults':bestscore[1]})
-        except Exception as e:
-            print(e)
-            evalresults.append({'Datapoint':datapoint[1],'Precision':'NA','Recall':'NA','FScore':'NA','LongResults':'NA'})
-    # TODO multiprocessing goes here
-    return evalresults
+            list.append({'Datapoint':datapoint[1],'Recall':bestscore[0][0],'Precision':bestscore[0][1],'FScore':bestscore[0][2],'LongResults':bestscore[1]})
+        except EmptyException:
+            return
+
+# Just pass it the input and output files to test, it will return all the results.
+def evaluate_clfs(filepairs, nproc=8):
+    man = Manager()
+    datainputqueue = man.Queue()
+    for datapoint in filepairs:
+        datainputqueue.put(datapoint)
+    dataoutputlist = man.list()
+    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist)) for i in range(nproc)]
+    text_trap = io.StringIO()
+    sys.stdout = text_trap
+    for proc in procs:
+        proc.start()
+    for proc in procs:
+        proc.join()
+        proc.terminate()
+    sys.stdout = sys.__stdout__
+    return list(dataoutputlist)
 
 if __name__ == "__main__":
+    freeze_support()
     # TODO this command line tool
     # when called from the command line it needs an input file with pairs of filenames,
     # also a results file to write to
