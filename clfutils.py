@@ -1,4 +1,5 @@
 from nltk.sem.drt import *
+import re # helps in simplify_clf
 
 # Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
 # It takes as input a condition from the DRT module, the name of the projective DRS it belongs to,
@@ -116,14 +117,19 @@ def simplify_clf(clflines):
                 clflinestokens[i] = (x[:2] + x[3:],y)
     # Change any ArgN or theta-roles to just Arg.
     for x,_ in clflinestokens:
-        if len(x) > 1 and ((x[1] in ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Theme","Co_Agent")) or (
+        if len(x) > 1 and ((x[1] in ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Theme","Co_Agent","Co-Theme","Co-Agent","Stimulus")) or (
                 x[1].startswith('Arg') and x[1][3:].isdigit())):
             x[1] = "Arg"
     # Remove lines that include variable t if t participates in a Time relation as the second argument.
     timevars = [x[-1] for x,y in clflinestokens if len(x)>1 and x[1]=='Time']
     for t in timevars:
         clflinestokens = [(x,y) for x,y in clflinestokens if t not in x[2:]]
-    # TODO Flatten all PRESUPPOSITION relations
+    # Remove box-level relations.
+    clflinestokens = [(x,y) for x,y in clflinestokens if sum([re.match(r'^b\d*$',tok) is not None for tok in x if isinstance(tok,str)]) <= 1]
+    # Make all box labels the same
+    for x,_ in clflinestokens:
+        if len(x) > 0 and re.match(r'^b\d*$',x[0]):
+            x[0] = 'b0'
     return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
 
 
@@ -211,7 +217,7 @@ def simplify_drs(drs):
     for i in range(len(conds)):
         if isinstance(conds[i], ApplicationExpression) and conds[i].is_atom(): # if it's a relation thing
             condstring = str(conds[i].pred)
-            if condstring in ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Agent","Co_Theme") or condstring.startswith("Arg"):
+            if condstring in ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Agent","Co_Theme","Stimulus") or condstring.startswith("Arg"):
                 newpred = DrtConstantExpression(Variable("Arg"))
                 for arg in conds[i].args:
                     newpred = DrtApplicationExpression(newpred,arg)
