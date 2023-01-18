@@ -1,5 +1,5 @@
-import os
-os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
+#import os
+#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 
 from DRS_parsing.evaluation import counter
 from argparse import Namespace # to make arguments for counter

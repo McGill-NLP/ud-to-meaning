@@ -4,11 +4,11 @@ from nltk.sem.logic import unique_variable # helps for manipulating DRT expressi
 import graphviz # for displaying traces nicely
 from pptree import print_tree # helps print traces nicely
 import conllu # reading ConLL-U files
-import os # changing working directory
+#import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
 import logging
 # whatever the working directory is! on my computer it is this.
-os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
+#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 # the local modules and files should be in the working directory now
 from semtypes import *
 from conlluutils import *

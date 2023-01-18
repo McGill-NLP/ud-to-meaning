@@ -3,7 +3,7 @@ import stanza # parsing to UD
 import logging
 from multiprocessing import Process, Manager, freeze_support # To allow things to sometimes time out.
 from queue import Empty as EmptyException
-os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
+#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 import conlluutils
 import preprocessing
 import treetodrs
