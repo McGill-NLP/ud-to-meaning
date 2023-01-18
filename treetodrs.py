@@ -6,6 +6,7 @@ from pptree import print_tree # helps print traces nicely
 import conllu # reading ConLL-U files
 import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
+import logging
 # whatever the working directory is! on my computer it is this.
 os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 # the local modules and files should be in the working directory now
@@ -52,7 +53,7 @@ def add_denotation(t):
         t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(t['lemma'].lower().replace("-","_").replace("exist","exst").replace(".","").replace("all","alll"))))
                             for template in postemplates[t['upos']]]
     else:
-        print("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
+        logging.warning("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
     if t['deprel'] in relswithnoden:
         return t
     elif t['deprel'] in relmeanings.keys():
@@ -62,7 +63,7 @@ def add_denotation(t):
     elif ':' in t['deprel'] and t['deprel'].split(':')[0] in relswithnoden:
         return t
     else:
-        print("The relation {} on the word {} with ID {} is a relation with unknown denotation.".format(t['deprel'], t['form'], str(t['id'])))
+        logging.warning("The relation {} on the word {} with ID {} is a relation with unknown denotation.".format(t['deprel'], t['form'], str(t['id'])))
     return t
 
 # This function computes the conjunction (in an essentially Lasersohn way) of two lambda-expressions
@@ -82,6 +83,7 @@ def compute_conj(den1, den2, semtype):
         return den1 + den2
     elif semtype.is_atomic():
         return DrtExpression.fromstring(str(den1)+"-and-"+str(den2))
+    logging.warning(f"Not currently able to handle conjunctions of things of type {semtype}")
     # Now we deal with types that are functions from somewhere to somewhere else.
     # It will involve heavy use of new variables.
     lefttype = semtype.get_left()
@@ -248,7 +250,8 @@ def simplifynodetyped(treenode, withtrace=False):
             nodedens = nodedens + newnodedens
         treenode.token['word_dens'] = nodedens
     elif iopairs:
-        print("There was a problem in binarizing children of node {} ({})".format(treenode.token['id'], treenode.token['form']))
+        logging.warning(f"There was a problem in binarizing children of node {treenode.token['id']} ({treenode.token['form']}, POS:{treenode.token['upos']})")
+        logging.debug(f"Node {treenode.token['id']} ({treenode.token['form']}, POS: {treenode.token['upos']}) children are related by unbinarizable relations {[child.token['deprel'] for child in usefulchildren]}")
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
     # so we have to update its semantic type after simplifying this node.

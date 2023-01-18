@@ -8,6 +8,7 @@ import sys # for turning off printing when running counter
 import io # for turning off printing when running counter
 from multiprocessing import Process, Manager, freeze_support
 from queue import Empty as EmptyException
+import logging
 
 # This simply helps to pass arguments to Counter, since Counter expects command line arguments.
 # Most of the code in this function is taken from the Counter code itself and is not mine.
@@ -67,18 +68,18 @@ def build_counter_args(f1, f2,
         raise ValueError('Number of restarts must be larger than 0')
 
     if args.ms and args.parallel > 1:
-        print('WARNING: using -ms and -p > 1 messes up printing to screen - not recommended')
+        logging.warning('WARNING: using -ms and -p > 1 messes up printing to screen - not recommended')
         time.sleep(5)  # so people can still read the warning
 
     if args.ill in ['dummy', 'spar']:
-        print('WARNING: by using -ill {0}, ill-formed DRSs are replaced by a {0} DRS'.format(args.ill))
+        logging.warning('WARNING: by using -ill {0}, ill-formed DRSs are replaced by a {0} DRS'.format(args.ill))
         time.sleep(3)
     elif args.ill == 'score':
-        print ('WARNING: ill-formed DRSs are given a score as if they were valid -- results in unofficial F-scores')
+        logging.warning('WARNING: ill-formed DRSs are given a score as if they were valid -- results in unofficial F-scores')
         time.sleep(3)
 
     if args.runs > 1 and args.prin:
-        print('WARNING: we do not print specific information (-prin) for runs > 1, only final averages')
+        logging.warning('WARNING: we do not print specific information (-prin) for runs > 1, only final averages')
         time.sleep(5)
 
     if args.partial:
@@ -86,10 +87,13 @@ def build_counter_args(f1, f2,
     return args
 
 # TODO might be more elegant to use Pools in the future.
-def evaluate_clf_proc(queue,list):
+def evaluate_clf_proc(queue,list,logfilepfx=None):
+    if logfilepfx is not None:
+        logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     while True:
         try:
             datapoint = queue.get_nowait()
+            logging.info(f"Evaluating {datapoint[0]}")
             myargs = build_counter_args(datapoint[0],
                                         datapoint[1],
                                         ill='score',
@@ -98,6 +102,7 @@ def evaluate_clf_proc(queue,list):
                 ans = counter.main(myargs)
                 scores = [(counter.compute_f(items[0], items[1], items[2], myargs.significant, False),items[-1]) for items in ans]
             except ValueError:
+                logging.warning(f"Did not find output for datapoint {datapoint[0]}, using NA.")
                 scores = [(('NA','NA','NA'),'NA')]
             # get the best score to write down - we're doing oracle accuracy.
             bestscore = max(scores,key=lambda x:x[0][2])
@@ -106,21 +111,28 @@ def evaluate_clf_proc(queue,list):
             return
 
 # Just pass it the input and output files to test, it will return all the results.
-def evaluate_clfs(filepairs, nproc=8):
+def evaluate_clfs(filepairs, nproc=8, logfilepfx = None):
+    if logfilepfx is not None:
+        logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG,force=True)
     man = Manager()
     datainputqueue = man.Queue()
     for datapoint in filepairs:
         datainputqueue.put(datapoint)
     dataoutputlist = man.list()
-    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist)) for i in range(nproc)]
+    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,f"{logfilepfx}-proc{i}")) for i in range(nproc)]
+    logging.info(f"Successfully made the {nproc} evaluation processes.")
     text_trap = io.StringIO()
     sys.stdout = text_trap
     for proc in procs:
         proc.start()
+    logging.info("Successfully started the evaluation processes.")
     for proc in procs:
         proc.join()
         proc.terminate()
+    logging.info("All evaluation processes have finished.")
     sys.stdout = sys.__stdout__
+    if logfilepfx is not None:
+        logging.basicConfig(force=True)
     return list(dataoutputlist)
 
 if __name__ == "__main__":

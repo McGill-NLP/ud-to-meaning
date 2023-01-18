@@ -47,6 +47,7 @@ import re
 import sys
 import multiprocessing
 from multiprocessing import Pool
+import logging
 import json #reading in dict
 
 try:
@@ -211,15 +212,15 @@ def get_clauses(file_name, signature, ill_type, include_ref):
 							raise ValueError(e)
 						elif ill_type == 'dummy':
 							# FIXME: uncomment
-							print('WARNING: DRS {0} is ill-formed and replaced by a dummy DRS'.format(len(clause_list) +1))
+							logging.warning('WARNING: DRS {0} is ill-formed and replaced by a dummy DRS'.format(len(clause_list) +1))
 							clause_list.append(dummy_drs())
 							original_clauses.append([" ".join(x) for x in dummy_drs()])
 						elif ill_type == 'spar':
-							print('WARNING: DRS {0} is ill-formed and replaced by the SPAR DRS'.format(len(clause_list) +1))
+							logging.warning('WARNING: DRS {0} is ill-formed and replaced by the SPAR DRS'.format(len(clause_list) +1))
 							clause_list.append(spar_drs())
 							original_clauses.append([" ".join(x) for x in spar_drs()])
 						elif ill_type == 'score':
-							print('WARNING: DRS {0} is ill-formed, but try to give a score anyway - might still error later'.format(len(clause_list) +1))
+							logging.warning('WARNING: DRS {0} is ill-formed, but try to give a score anyway - might still error later'.format(len(clause_list) +1))
 
 							clause_list.append(cur_clauses)
 							original_clauses.append(cur_orig)
@@ -495,33 +496,33 @@ def print_results(res_list, no_print, start_time, single, args):
 	elif no_print:  # averaging over multiple runs, don't print results
 		return [precision, recall, best_f_score]
 	else:
-		print('\n## Clause information ##\n')
-		print('Clauses prod : {0}'.format(total_test_num))
-		print('Clauses gold : {0}\n'.format(total_gold_num))
+		logging.info('\n## Clause information ##\n')
+		logging.info('Clauses prod : {0}'.format(total_test_num))
+		logging.info('Clauses gold : {0}\n'.format(total_gold_num))
 		if args.max_clauses > 0:
-			print('Max number of clauses per DRS:  {0}\n'.format(args.max_clauses))
-		print('## Main Results ##\n')
+			logging.info('Max number of clauses per DRS:  {0}\n'.format(args.max_clauses))
+		logging.info('## Main Results ##\n')
 		if not single:
-			print('All shown number are micro-averages calculated over {0} DRS-pairs\n'.format(len(res_list)))
-		print('Matching clauses: {0}\n'.format(total_match_num))
-		print("Precision: {0}".format(round(precision, args.significant)))
-		print("Recall   : {0}".format(round(recall, args.significant)))
-		print("F-score  : {0}".format(round(best_f_score, args.significant)))
+			logging.info('All shown number are micro-averages calculated over {0} DRS-pairs\n'.format(len(res_list)))
+		logging.info('Matching clauses: {0}\n'.format(total_match_num))
+		logging.info("Precision: {0}".format(round(precision, args.significant)))
+		logging.info("Recall   : {0}".format(round(recall, args.significant)))
+		logging.info("F-score  : {0}".format(round(best_f_score, args.significant)))
 
 		# Print specific output here
 		if args.prin:
-			print('\n## Detailed precision, recall, F-score ##\n')
+			logging.info('\n## Detailed precision, recall, F-score ##\n')
 			for idx in range(0,len(name_list)):
-				print('Prec, rec, F1 {0}: {1}, {2}, {3}'.format(name_list[idx], res_dict[name_list[idx]][0], res_dict[name_list[idx]][1], res_dict[name_list[idx]][2]))
+				logging.info('Prec, rec, F1 {0}: {1}, {2}, {3}'.format(name_list[idx], res_dict[name_list[idx]][0], res_dict[name_list[idx]][1], res_dict[name_list[idx]][2]))
 			if args.smart == 'conc':
 				smart_conc = compute_f(sum([y[0] for y in [x[3] for x in res_list]]), total_test_num, total_gold_num, args.significant, True)
-				print('Smart F-score concepts: {0}\n'.format(smart_conc))
+				logging.info('Smart F-score concepts: {0}\n'.format(smart_conc))
 
 			# For a single DRS we can print some more information
 			if single:
-				print('\n## Restarts and processing time ##\n')
-				print('Num restarts specified       : {0}'.format(args.restarts))
-				print('Found best mapping at restart: {0}'.format(int(found_idx)))
+				logging.info('\n## Restarts and processing time ##\n')
+				logging.info('Num restarts specified       : {0}'.format(args.restarts))
+				logging.info('Found best mapping at restart: {0}'.format(int(found_idx)))
 
 		# Print detailed results in an html file for the CodaLab usage
 		if args.codalab:
@@ -532,7 +533,7 @@ def print_results(res_list, no_print, start_time, single, args):
 			with codecs.open(args.codalab+'.html', 'w', encoding='UTF-8') as html:
 				html.write(html_content)
 
-	print('Total processing time: {0} sec'.format(runtime))
+	logging.info('Total processing time: {0} sec'.format(runtime))
 	return [precision, recall, best_f_score]
 
 
@@ -540,23 +541,23 @@ def check_input(clauses_prod_list, original_prod, original_gold, clauses_gold_li
 	'''Check if the input is valid -- or fill baseline if that is asked'''
 	if baseline:  # if we try a baseline DRS, we have to fill a list of this baseline
 		if len(clauses_prod_list) == 1:
-			print('Testing baseline DRS vs {0} DRSs...\n'.format(len(clauses_gold_list)))
+			logging.info('Testing baseline DRS vs {0} DRSs...\n'.format(len(clauses_gold_list)))
 			clauses_prod_list = fill_baseline_list(clauses_prod_list[0], clauses_gold_list)
 			original_prod = fill_baseline_list(original_prod[0], original_gold)
 		else:
 			raise ValueError("Using --baseline, but there is more than 1 DRS in prod file")
 	elif len(clauses_prod_list) != len(clauses_gold_list):
-		print("Number of DRSs not equal, {0} vs {1}, exiting...".format(len(clauses_prod_list), len(clauses_gold_list)))
+		logging.warning("Number of DRSs not equal, {0} vs {1}, exiting...".format(len(clauses_prod_list), len(clauses_gold_list)))
 		sys.exit(0)
 	elif len(clauses_prod_list) == 0 and len(clauses_gold_list) == 0:
-		print("Both DRSs empty, exiting...")
+		logging.warning("Both DRSs empty, exiting...")
 		sys.exit(0)
 	elif not single:
-		print('Comparing {0} DRSs...\n'.format(len(clauses_gold_list)))
+		logging.info('Comparing {0} DRSs...\n'.format(len(clauses_gold_list)))
 
 	# Print number of DRSs we skip due to the -max_clauses parameter
 	if max_clauses > 0 and not single:
-		print('Skipping {0} DRSs due to their length exceeding {1} (--max_clauses)\n'.format(len([x for x, y in zip(clauses_gold_list, clauses_prod_list) if len(x) > max_clauses or len(y) > max_clauses]), max_clauses))
+		logging.info('Skipping {0} DRSs due to their length exceeding {1} (--max_clauses)\n'.format(len([x for x, y in zip(clauses_gold_list, clauses_prod_list) if len(x) > max_clauses or len(y) > max_clauses]), max_clauses))
 	return original_prod, clauses_prod_list
 
 
@@ -742,8 +743,8 @@ def save_stats(all_clauses, all_vars, stat_file):
 			best_idx = idx
 
 	drs_max_clauses, mean_clauses, mean_variables = best_idx + 1, float(sum(all_clauses)) / float(len(all_clauses)), float(sum(all_vars)) / float(len(all_vars))
-	print('\nStatistics:\n\nDRS {0} has max clauses\nLen DRSs: {1}\nMean clauses: {2}\nMedian clauses: {3}\nMax clauses: {4}\n'.format(drs_max_clauses, len(all_clauses), mean_clauses, median(all_clauses), max(all_clauses)))
-	print('Mean variables: {0}\nMedian variables: {1}\nMax variables: {2}\n'.format(mean_variables, median(all_vars), max(all_vars)))
+	logging.info('\nStatistics:\n\nDRS {0} has max clauses\nLen DRSs: {1}\nMean clauses: {2}\nMedian clauses: {3}\nMax clauses: {4}\n'.format(drs_max_clauses, len(all_clauses), mean_clauses, median(all_clauses), max(all_clauses)))
+	logging.info('Mean variables: {0}\nMedian variables: {1}\nMax variables: {2}\n'.format(mean_variables, median(all_vars), max(all_vars)))
 
 	dump_lists = [all_clauses, all_vars]
 	pickle.dump(dump_lists, open(stat_file, 'w'))
@@ -803,10 +804,10 @@ def main(args):
 
 	# If multiple runs, print averages
 	if res and args.runs > 1 and not args.stats:
-		print('Average scores over {0} runs:\n'.format(args.runs))
-		print('Precision: {0}'.format(round(float(sum([x[0] for x in res])) / float(args.runs), args.significant)))
-		print('Recall   : {0}'.format(round(float(sum([x[1] for x in res])) / float(args.runs), args.significant)))
-		print('F-score  : {0}'.format(round(float(sum([x[2] for x in res])) / float(args.runs), args.significant)))
+		logging.info('Average scores over {0} runs:\n'.format(args.runs))
+		logging.info('Precision: {0}'.format(round(float(sum([x[0] for x in res])) / float(args.runs), args.significant)))
+		logging.info('Recall   : {0}'.format(round(float(sum([x[1] for x in res])) / float(args.runs), args.significant)))
+		logging.info('F-score  : {0}'.format(round(float(sum([x[2] for x in res])) / float(args.runs), args.significant)))
 
 	# print scores in scores.txt file for codalab usage
 	if len(res) == 1 and args.runs == 1 and args.codalab:
