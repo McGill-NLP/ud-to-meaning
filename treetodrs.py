@@ -2,7 +2,6 @@
 from nltk.sem.drt import * # all the DRT things
 from nltk.sem.logic import unique_variable # helps for manipulating DRT expressions
 import graphviz # for displaying traces nicely
-from pptree import print_tree # helps print traces nicely
 import conllu # reading ConLL-U files
 #import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
@@ -251,7 +250,7 @@ def simplifynodetyped(treenode, withtrace=False):
         treenode.token['word_dens'] = nodedens
     elif iopairs:
         logging.warning(f"There was a problem in binarizing children of node {treenode.token['id']} ({treenode.token['form']}, POS:{treenode.token['upos']})")
-        logging.debug(f"Node {treenode.token['id']} ({treenode.token['form']}, POS: {treenode.token['upos']}) children are related by unbinarizable relations {[child.token['deprel'] for child in usefulchildren]}")
+        logging.debug(f"Node {treenode.token['id']} ({treenode.token['form']}, POS: {treenode.token['upos']}, deprel: {treenode.token['deprel']}) children are related by unbinarizable relations {[child.token['deprel'] for child in usefulchildren]}")
     # If the node is one that's conjoined to another node,
     # we want the "conj" type to enforce that the other node has the same semantic type,
     # so we have to update its semantic type after simplifying this node.
