@@ -82,10 +82,17 @@ def compute_conj(den1, den2, semtype):
     # Deal with atomic types first
     if semtype == SemType.fromstring('t'):
         return den1 + den2
-    elif semtype.is_atomic():
+    if semtype.is_atomic():
         return DrtExpression.fromstring(str(den1)+"-and-"+str(den2))
+    # And a few other special cases
+    if semtype.like(SemType.fromstring('(ut)')):
+        conjden = DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')
+        return conjden(den1)(den2).simplify()
+    if semtype.like(SemType.fromstring('(u(st))')):
+        conjden = DrtExpression.fromstring(r'\F.\G.\x.\y.(F(x,y)+G(x,y))')
+        return conjden(den1)(den2).simplify()
     logging.warning(f"Not currently able to handle conjunctions of things of type {semtype}")
-    # Now we deal with types that are functions from somewhere to somewhere else.
+    # Now we (attempt to) deal with types that are functions from somewhere to somewhere else.
     # It will involve heavy use of new variables.
     lefttype = semtype.get_left()
     if lefttype.is_atomic() and lefttype != SemType.fromstring('t'):
