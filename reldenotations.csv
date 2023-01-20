@@ -61,6 +61,7 @@ mark	((e(st))((s(st))(e(s(st)))))	\F G x y z.(F(x,z) + G(y,z))
 mark	((st)((s(st))(s(st))))	\F G x y.(F(y) + G(x,y))
 mark	((st)((t(tt))(tt)))	\F G x.G(x,(([y],[]) + F(y)))
 mark	(t((t(tt))(tt)))	\y G x.G(x,y)
+nmod:poss	((et)(((et)t)(et)))	\F G x.(F(x) + G(\y.([],[Of(x,y)])))
 conj	(?(??))	([],[])
 cc	NA	NA
 punct	NA	NA
