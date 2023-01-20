@@ -20,8 +20,11 @@ def get_stanza():
 def getalldens_proc_wrapper(tree, queue, logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
-    dens = treetodrs.getalldens(tree)
-    queue.put(dens)
+    try:
+        dens = treetodrs.getalldens(tree)
+        queue.put(dens)
+    except Exception as e:
+        logging.exception(str(e))
     return
 
 def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=None):
