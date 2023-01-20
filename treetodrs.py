@@ -281,7 +281,7 @@ def simplifynodetyped(treenode, withtrace=False):
 def getalldens(tokenlist, withtrace = False):
     withdens = conllu.TokenList([add_denotation(token) for token in tokenlist])
     simplified = simplifynodetyped(withdens.to_tree(), withtrace)
-    return simplified.token['word_dens']
+    return simplified.token['word_dens'] if 'word_dens' in simplified.token.keys() else []
 
 # Turn a trace (as returned by simplifynodetyped) into a GraphViz directed graph
 # which can then be viewed, or styled, or whatever as desired.
