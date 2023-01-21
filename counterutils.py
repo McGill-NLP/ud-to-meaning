@@ -2,13 +2,15 @@
 #os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 
 from DRS_parsing.evaluation import counter
-from argparse import Namespace # to make arguments for counter
+from argparse import Namespace
+import argparse
 import time # part of a function taken from counter
 import sys # for turning off printing when running counter
 import io # for turning off printing when running counter
 from multiprocessing import Process, Manager, freeze_support
 from queue import Empty as EmptyException
 import logging
+import csv # writing output
 
 # This simply helps to pass arguments to Counter, since Counter expects command line arguments.
 # Most of the code in this function is taken from the Counter code itself and is not mine.
@@ -137,7 +139,19 @@ def evaluate_clfs(filepairs, nproc=8, logfilepfx = None):
 
 if __name__ == "__main__":
     freeze_support()
-    # TODO this command line tool
-    # when called from the command line it needs an input file with pairs of filenames,
-    # also a results file to write to
-    print("I promise I'll implement this :)")
+    parser = argparse.ArgumentParser("Run Counter on a batch of file pairs, printing results to a detailed csv.")
+    parser.add_argument("-i","--infile",action="store",required=True,dest="infile",help="the file to read file pairs for evaluation, each pair on a line and separated by tab")
+    parser.add_argument("-o","--outfile",action="store",required=True,dest="outfile",help="the file to write output to in tsv format")
+    parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the evaluation?")
+    parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings may be added")
+    args = parser.parse_args()
+    with open(args.infile) as f:
+        infileraw = f.read()
+    filepairs = [x.split('\t') for x in infileraw.split('\n')]
+    ans = evaluate_clfs(filepairs,nproc=args.nproc,logfilepfx=args.logfilepfx)
+    with open(args.outfile, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore','LongResults'])
+        nlines = writer.writeheader()
+        for row in ans:
+            nlines = writer.writerow(row)
+

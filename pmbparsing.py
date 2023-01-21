@@ -3,6 +3,7 @@ import stanza # parsing to UD
 import logging
 from multiprocessing import Process, Manager, freeze_support # To allow things to sometimes time out.
 from queue import Empty as EmptyException
+import argparse # command line arguments
 #os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 import conlluutils
 import preprocessing
@@ -124,6 +125,15 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
 
 if __name__ == "__main__":
     freeze_support()
-    # TODO this command line tool
-    # when called from the command line it needs the exact same inputs lol
-    print("I promise I'll implement this :)")
+    parser = argparse.ArgumentParser(description="Run UD parsing and then conversion to PMB for a batch of files.")
+    parser.add_argument("-p","--pmbdir",action="store",required=True,dest="pmbdir",help="the directory to (recursively) search for input PMB files")
+    parser.add_argument("-o","--outdir",action="store",required=True,dest="outdir",help="the directory in which to write output files")
+    parser.add_argument("-f","--outfile",action="store",required=False,dest="outfile",help="the file to write file pairs for evaluation")
+    parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the parsing?")
+    parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings will be added")
+    args = parser.parse_args()
+    filepairs = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),logfilepfx=args.logfilepfx)
+    if args.outfile is not None:
+        with open(args.outfile,"w") as f:
+            f.write('\n'.join(['\t'.join(x) for x in filepairs]))
+
