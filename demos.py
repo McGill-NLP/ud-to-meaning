@@ -31,14 +31,14 @@ def pmbdemo(pmbpath, partnum, docnum, simplified=False):
             docnum = str(docnum)
         if not docnum.startswith('d'):
             docnum = 'd'+docnum
-    with open(pmbpath + "\\" + str(partnum) + "\\" + str(docnum) + r"\en.drs.clf") as f:
+    with open(os.path.join(pmbpath, str(partnum), str(docnum), r"en.drs.clf")) as f:
         pmbclfraw = f.read()
         pmbclflines = pmbclfraw.split('\n')
     if simplified:
         pmbclflines = clfutils.simplify_clf(pmbclflines)
     pmb_drs = clfutils.clf_to_drs(pmbclflines)
     # Read the raw PMB file,
-    with open(pmbpath + "\\" + str(partnum) + "\\" + str(docnum) + r"\en.raw") as f:
+    with open(os.path.join(pmbpath,str(partnum),str(docnum), r"en.raw")) as f:
         textraw = f.read()
     # Parse with Stanza,
     stanzanlp = get_stanza()
