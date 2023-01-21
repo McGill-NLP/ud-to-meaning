@@ -68,7 +68,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             treetodrsproc.join(timeout=timeoutsecs) #
             treetodrsproc.terminate()
             if treetodrsproc.exitcode is None or workingqueue.empty():
-                logging.warning("Parsing datapoint:{dpname} took too long (over {timeoutsecs} seconds).")
+                logging.warning(f"Parsing datapoint:{dpname} took too long (over {timeoutsecs} seconds).")
                 continue
             ud_drss = workingqueue.get_nowait()
             logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
