@@ -41,7 +41,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
         try:
             dpname = queue.get_nowait()
             logging.info(dpname)
-            dpdir = outdir+'\\'+dpname.replace('\\','-')
+            dpdir = os.path.join(outdir,dpname.replace('\\','-').replace('/','-'))
             if not os.path.exists(dpdir):
                 os.mkdir(dpdir)
             # read the raw file
@@ -51,17 +51,17 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             # UD parse, and print to output file
             ud_parse = conlluutils.stanza_to_conllu(stanzanlp(textraw))
             ud_out = ud_parse.serialize()
-            with open(dpdir+'\\'+'udparse.conll',mode='w') as f:
+            with open(os.path.join(dpdir,'udparse.conll'),mode='w') as f:
                 nlines = f.write(ud_out)
             logging.debug(f"Successfully performed UD parsing for {dpname}.")
             preprocessed = preprocessing.preprocess(ud_parse)
             preproc_out = preprocessed.serialize()
-            with open(dpdir+'\\'+'preproc.conll',mode='w',encoding='utf8') as f:
+            with open(os.path.join(dpdir,'preproc.conll'),mode='w',encoding='utf8') as f:
                 nlines = f.write(preproc_out)
             logging.debug(f"Successfully performed UD preprocessing for {dpname}.")
             # DRSs to an output file
             #ud_drss = treetodrs.getalldens(preprocessed)
-            treetodrsproc = Process(target=getalldens_proc_wrapper,args=(preprocessed,workingqueue,dpdir+'\\treetodrslog'),daemon=True)
+            treetodrsproc = Process(target=getalldens_proc_wrapper,args=(preprocessed,workingqueue,os.path.join(dpdir,'treetodrslog')),daemon=True)
             treetodrsproc.start()
             timeoutsecs = 300 # seconds
             treetodrsproc.join(timeout=timeoutsecs) #
@@ -72,17 +72,17 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             ud_drss = workingqueue.get_nowait()
             logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
             clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
-            with open(dpdir+'\\'+'drsoutput.clf', 'w',encoding='utf8') as f:
+            with open(os.path.join(dpdir,'drsoutput.clf'), 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
             # change both of them to simplified files
-            simplifieddrsname = dpdir+'\\'+'drsoutputsimple.clf'
+            simplifieddrsname = os.path.join(dpdir,'drsoutputsimple.clf')
             with open(simplifieddrsname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(clfutils.simplify_clf(x)) for x in clflines]))
             pmbclf = ''
             with open(datapointpathdict[dpname]['drs']) as f:
                 pmbclf = f.read()
             pmbclflines = pmbclf.split('\n')
-            simplifiedpmbname = dpdir+'\\'+"pmbsimple.clf"
+            simplifiedpmbname = os.path.join(dpdir, "pmbsimple.clf")
             with open(simplifiedpmbname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n'.join(clfutils.simplify_clf(pmbclflines)))
             logging.debug(f"Successfully performed DRS simplification for {dpname}.")
@@ -97,7 +97,7 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
     for path, _, files in os.walk(pmbdir):
-        pmbfiles = pmbfiles + [path + '\\' + x for x in files]
+        pmbfiles = pmbfiles + [os.path.join(path,x) for x in files]
     datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
     datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off','raw':x+'.raw'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles and x+'.raw' in pmbfiles)
     logging.info(f"Found {len(datapointpathdict)} files to process.")
