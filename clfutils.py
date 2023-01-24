@@ -92,6 +92,25 @@ def drses_to_clf(drslist):
     clflineses = [drs_to_clf(x) for x in drslist if isinstance(x,DRS)]
     return clflineses
 
+# Converting Simplified Box Notation to CLF format.
+def sbn_to_clf(sbnlines):
+    commentsplit = [x.split("%") for x in sbnlines]
+    nonemptylines = [x[0].strip() for x in commentsplit if len(x)>0]
+    nonemptylines = [x for x in nonemptylines if len(x)>0]
+    variables = ["x"+str(i) for i in range(1,len(nonemptylines)+1)]
+    clflines = [f"b0 REF {x}" for x in variables]
+    for i in range(len(nonemptylines)):
+        predlong = nonemptylines[i].split(' ')[0]
+        predshort, synset = predlong.split('.')[0], '.'.join(predlong.split('.')[1:])
+        clflines.append(f"b0 {predshort} \"{synset}\" {variables[i]}")
+        relparts = [x for x in nonemptylines[i].split(' ')[1:] if len(x)>0]
+        print(relparts)
+        relations_var = [(relparts[j],int(relparts[j+1])) for j in range(0,len(relparts),2) if relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit()]
+        relations_const = [(relparts[j],relparts[j+1]) for j in range(0,len(relparts),2) if not (relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit())]
+        clflines = clflines + [f"b0 {x} {variables[i]} {variables[i+y]}" for x,y in relations_var]
+        clflines = clflines + [f"b0 {x} {variables[i]} \"{y}\"" for x,y in relations_const]
+    return clflines
+
 # This function takes a list of lines in CLF format
 # and simplifies them by removing the information I can't get from them:
 # extra information that comes with names,
