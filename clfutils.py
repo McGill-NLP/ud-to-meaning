@@ -104,7 +104,6 @@ def sbn_to_clf(sbnlines):
         predshort, synset = predlong.split('.')[0], '.'.join(predlong.split('.')[1:])
         clflines.append(f"b0 {predshort} \"{synset}\" {variables[i]}")
         relparts = [x for x in nonemptylines[i].split(' ')[1:] if len(x)>0]
-        print(relparts)
         relations_var = [(relparts[j],int(relparts[j+1])) for j in range(0,len(relparts)-1,2) if relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit()]
         relations_const = [(relparts[j],relparts[j+1]) for j in range(0,len(relparts)-1,2) if not (relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit())]
         clflines = clflines + [f"b0 {x} {variables[i]} {variables[i+y]}" for x,y in relations_var]
