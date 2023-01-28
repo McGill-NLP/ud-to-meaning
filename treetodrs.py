@@ -91,6 +91,9 @@ def compute_conj(den1, den2, semtype):
     if semtype.like(SemType.fromstring('(u(st))')):
         conjden = DrtExpression.fromstring(r'\F.\G.\x.\y.(F(x,y)+G(x,y))')
         return conjden(den1)(den2).simplify()
+    if semtype.like(SemType.fromstring('(e(e(st)))')):
+        conjden = DrtExpression.fromstring(r'\F.\G.\x.\y.\z.(F(x,y,z)+G(x,y,z))')
+        return conjden(den1)(den2).simplify()
     logging.warning(f"Not currently able to handle conjunctions of things of type {semtype}")
     # Now we (attempt to) deal with types that are functions from somewhere to somewhere else.
     # It will involve heavy use of new variables.
