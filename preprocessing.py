@@ -26,7 +26,7 @@ def switch_propnflattonmod(sentence):
                     token['deprel'] = 'nmod'
                     seenheads[token['head']] = token['id']
                     token['upos'] = 'PROPN-MOD'
-    return sentence
+    return conllu.TokenList(sentence)
 
 # This function takes a TokenList as input
 # and returns a new TokenList,
@@ -65,17 +65,20 @@ def add_nulldeterminers(sentence):
 # and adds null determiners to any determiner-less nouns and proper nouns (except those modified by "amod"),
 # returning a new TokenList
 def preprocess(sentence):
-    return add_nulldeterminers(
+    flat = flatten_relation_list(
                 flatten_relation_list(
                     flatten_relation_list(
-                        flatten_relation_list(
-                            switch_propnflattonmod(
-                                sentence
-                            ),
-                        'flat'
+                        switch_propnflattonmod(
+                            sentence
                         ),
-                    'compound'
+                    'flat'
                     ),
-                'goeswith'
-                )
+                'compound'
+                ),
+            'goeswith'
             )
+    deprels = set(token['deprel'] for token in flat)
+    for rel in deprels:
+        if rel.startswith('compound') or rel.startswith('goeswith') or rel.startswith('flat'):
+            flat = flatten_relation_list(flat,rel)
+    return add_nulldeterminers(flat)

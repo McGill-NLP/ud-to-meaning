@@ -100,9 +100,9 @@ def flatten_relation_tree(treenode,relation):
 # and performs the same operation as flatten_relation_tree on it,
 # returning the resulting TokenList with new indices.
 def flatten_relation_list(sentence,relation):
-    return reindex_tokenlist(
+    return conllu.TokenList(reindex_tokenlist(
                 tree_to_tokenlist(
                     flatten_relation_tree(
                         sentence.to_tree(), relation
-                    )))
+                    ))))
 
