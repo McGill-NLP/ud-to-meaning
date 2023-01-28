@@ -42,7 +42,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
         try:
             dpname = queue.get_nowait()
             logging.info(dpname)
-            dpdir = os.path.join(outdir,dpname.replace('\\','-').replace('/','-'))
+            dpdir = os.path.join(outdir,dpname.replace('\\','-').replace('/','-').replace('.',''))
             if not os.path.exists(dpdir):
                 os.mkdir(dpdir)
             # read the raw file
