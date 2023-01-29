@@ -1,10 +1,13 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
+# PMB for testing
+pmbmini
+pmb-gold-english
+
 # Personal scribbling file
 scratch work
 sketchnotes.txt
-pmb-gold-english
 
 # imported DRS parsing folder
 DRS_parsing
