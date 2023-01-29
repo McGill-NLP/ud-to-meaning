@@ -48,6 +48,11 @@ DET	(et)	\x.([],[Quantity(x,{})])
 SCONJ	(e(tt))	\x.\y.([u],[{}(x,u),u:y])
 SCONJ	(s(st))	\x.\y.([],[{}(x,y)])
 SCONJ	(t(tt))	\x.\y.([u,v],[{}(u,v),u:x,v:y])
+EXTRA	(et)	\x.([],[{}(x)])
+EXTRA	t	([e,x],[{}(x),say(e),Theme(e,x),Agent(e,"speaker")])
+EXTRA	t	([e,x],[Name(x,{}),event(e),Participant(e,x)])
+EXTRA	(e(st))	\x.\y.([],[{}(y),Arg1(y,x)])
+EXTRA	(e(e(st)))	\x.\y.\z.([],[{}(z),Arg1(z,x),Arg2(z,y)])
 CCONJ	NA	NA
 PUNCT	NA	NA
 INTJ	NA	NA
