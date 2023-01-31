@@ -218,6 +218,7 @@ def simplifynodetyped(treenode, withtrace=False):
     # with dummy starting type
     starts = [(SemType(),den[0]) for den in treenode.token['word_dens']]
     ends = [(den[0].get_right().get_left(),SemType()) for den in treenode.token['rel_dens']]
+    ends = [ends[i] for i in set([ends.index(x) for x in ends])]
     iopairs = [starts] + iopairs + [ends]
     binarizations = multidominobinarizations(SemType(),SemType(),iopairs,comp_func = lambda x,y:x.like(y))
     # Binarizations tell you which dependents to combine first.
