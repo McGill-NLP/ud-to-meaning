@@ -75,6 +75,8 @@ def process_cond(cond, mydrsname, counter):
 # If it is being recursively called (or is called with a high counter number)
 # it also returns an updated counter
 def drs_to_clf(drs, counter=0):
+    if not isinstance(x,DRS):
+        return []
     istop = counter==0
     mydrsname = 'b'+str(counter)
     counter = counter + 1
