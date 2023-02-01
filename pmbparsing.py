@@ -38,6 +38,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             toggle=1
         except PermissionError:
             continue
+    queuetries = 0
     while True:
         try:
             dpname = queue.get_nowait()
@@ -90,6 +91,11 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             list.append((simplifiedpmbname,simplifieddrsname))
         except EmptyException:
             return
+        except ConnectionError:
+            queuetries = queuetries+1
+            if queuetries>20:
+                logging.exception(f"Too many ConnectionErrors (at least {queuetries}):\n"+str(Exception))
+                return
         except Exception as e:
             logging.exception(str(Exception))
 
