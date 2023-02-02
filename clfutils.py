@@ -112,40 +112,9 @@ def sbn_to_clf(sbnlines):
         clflines = clflines + [f"b0 {x} {variables[i]} \"{y}\"" for x,y in relations_const]
     return clflines
 
-# This function takes a list of lines in CLF format
-# and simplifies them by removing the information I can't get from them:
-# extra information that comes with names,
-# tense information,
-# and theta roles.
 def simplify_clf(clflines):
     clflinespctsplit = [x.split("%") for x in clflines]
-    textwords = set(x[1] for x in clflinespctsplit if len(x)>1)
-    # Remove lowercase lines that come from the same word as a Name line.
-    if textwords:
-        linestodrop = []
-        for word in textwords:
-            sameword = [x for x in clflinespctsplit if (len(x)>1 and x[1] == word)]
-            if sameword and max((x[0][3:7] == "Name") for x in sameword): # if this came from the same word
-                for x in sameword:
-                    if len(x[0]) > 3 and x[0][3].islower():
-                        linestodrop.append(x)
-        clflinespctsplit = [x for x in clflinespctsplit if x not in linestodrop and len(x) > 0]
     clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
-    # Remove the first argument on the line if it's a "sense" disambiguation thing
-    for i in range(len(clflinestokens)):
-        x, y = clflinestokens[i]
-        if len(x) > 2:
-            if len(x[2]) > 2 and x[2][0]=='"' and x[2][1].isalpha() and x[2][2] == '.' and x[2][3:-1].isdigit() and x[2][-1] == '"':
-                clflinestokens[i] = (x[:2] + x[3:],y)
-    # Change any ArgN or theta-roles to just Arg.
-    for x,_ in clflinestokens:
-        if len(x) > 1 and ((x[1] in argrelations) or (
-                x[1].startswith('Arg') and x[1][3:].isdigit())):
-            x[1] = "Arg"
-    # Remove lines that include variable t if t participates in a Time relation as the second argument.
-    timevars = [x[-1] for x,y in clflinestokens if len(x)>1 and x[1]=='Time']
-    for t in timevars:
-        clflinestokens = [(x,y) for x,y in clflinestokens if t not in x[2:]]
     # Remove box-level relations.
     clflinestokens = [(x,y) for x,y in clflinestokens if sum([re.match(r'^b\d*$',tok) is not None for tok in x if isinstance(tok,str)]) <= 1]
     # Make all box labels the same
@@ -223,38 +192,8 @@ def clf_to_drs(clflines):
         finaldrs = finaldrs + pointedboxes[pointer]
     return DrtExpression.fromstring(str(finaldrs.simplify()))
 
-
-# Removes tense
-# (any variable which is the second argument in a Time(e,t) relation,
-# and any conditions with that variable)
-# and converts all theta roles to just Arg
 def simplify_drs(drs):
-    conds = [x for x in drs.conds]
-    refs = drs.refs
-    # recursive application to sub-DRS:
-    for i in range(len(conds)):
-        if isinstance(conds[i],DrtProposition):
-            cond = conds[i]
-            conds[i] = DrtProposition(cond.variable,simplify_drs(cond.drs))
-    for i in range(len(conds)):
-        if isinstance(conds[i], ApplicationExpression) and conds[i].is_atom(): # if it's a relation thing
-            condstring = str(conds[i].pred)
-            if condstring in argrelations or condstring.startswith("Arg"):
-                newpred = DrtConstantExpression(Variable("Arg"))
-                for arg in conds[i].args:
-                    newpred = DrtApplicationExpression(newpred,arg)
-                conds[i] = newpred
-    newconds = conds
-    newrefs = refs
-    # tense:
-    for cond in conds:
-        if isinstance(cond,ApplicationExpression) and cond.is_atom():
-            if str(cond.pred) == "Time":
-                timevar = cond.argument.variable
-                newrefs = [x for x in newrefs if x != timevar] # remove the time variable
-                newconds = remove_conds_with_var(newconds,timevar) # and remove any condition that has it
-        pass
-    return DRS(newrefs,newconds)
+    return drs
 
 # Recursively removes any conditions that have a particular variable in them.
 def remove_conds_with_var(conds,var):
