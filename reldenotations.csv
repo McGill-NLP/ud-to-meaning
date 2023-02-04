@@ -88,7 +88,6 @@ root	(t((st)t))	\F.(([x,t],[Time(x,t),TIMEREL(t,"now"),FINDWORDNET_ROOT_time(t)]
 root	(t(tt))	\x.x
 root	(t((et)t))	\F.(([x],[]) + F(x))
 root	(t(((et)t)t))	\F.(F(\x.([],[])))
-root	(t(?t))	\F.([x],[])
 mark	((e(st))((e(tt))(et)))	\F G x.G(x,(([y,z],[]) + F(y,z)))
 mark	((st)((e(tt))(et)))	\F G x.G(x,(([y],[]) + F(y)))
 mark	((st)((t(tt))(st)))	\F G x.F(x)

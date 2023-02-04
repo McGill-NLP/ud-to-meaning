@@ -82,7 +82,8 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             ud_drss = workingqueue.get_nowait()
             logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
             clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
-            clflines = [postprocessing.postprocess_clf(x) for x in clflines]
+            # add one always-there useless parse
+            clflines = [postprocessing.postprocess_clf(x) for x in clflines] + [["b0 REF x1"]]
             with open(os.path.join(dpdir,'drsoutput.clf'), 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
             # change both of them to simplified files
