@@ -4,6 +4,9 @@ import copy # deep-copying Tokens and and TokenLists
 #os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 from conlluutils import *
 
+tokensubs = []
+with open("tokensubs.csv") as f:
+    tokensubs = [x.split() for x in f.read().split('\n') if '\t' in x]
 
 # This function is a hack,
 # but it changes any "flat" dependency relations
@@ -36,7 +39,6 @@ def switch_propnflattonmod(sentence):
 # Because of a hack involving the "flat" relation,
 # no determiner is inserted if the noun is related to its head with the "amod" relation.
 def add_nulldeterminers(sentence):
-    sentence = copy.deepcopy(sentence)
     determinered = [sentence.filter(id=token['head'])[0] for token in sentence
                         if (token['upos']=='DET' and token['deprel']=='det')]
     determinerless = [token for token in sentence
@@ -57,6 +59,18 @@ def add_nulldeterminers(sentence):
                         }))
     sentence = conllu.TokenList(sorted(sentence,key=lambda x:x['id']))
     return reindex_tokenlist(sentence)
+
+# This takes a sentence and removes characters from the lemmas
+# that will not play well with later derivation.
+# It is meant to undone by a step in postprocessing.
+def clean_lemmas(sentence):
+    sentence = copy.deepcopy(sentence)
+    for token in sentence:
+        token['lemma'] = token['lemma'].lower()
+        for sub in tokensubs:
+            token['lemma'] = token['lemma'].replace(sub[0],sub[1])
+        token['lemma'] = token['lemma'] + ("" if len(token['lemma'])>1 else "_LETTER")
+    return conllu.TokenList(sentence)
 
 # This combines all the previous steps in the correct order.
 # So, it changes flat relations between Nouns and Proper Nouns to "amod" relations (for semantic reasons),
@@ -81,4 +95,4 @@ def preprocess(sentence):
     for rel in deprels:
         if rel.startswith('compound') or rel.startswith('goeswith') or rel.startswith('flat'):
             flat = flatten_relation_list(flat,rel)
-    return add_nulldeterminers(flat)
+    return add_nulldeterminers(clean_lemmas(flat))

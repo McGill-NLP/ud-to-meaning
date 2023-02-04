@@ -9,6 +9,7 @@ import conlluutils
 import preprocessing
 import treetodrs
 import clfutils
+import postprocessing
 
 def get_stanza(language='en'):
     procs = 'tokenize,pos,lemma,depparse' if language in ('en','nl') else 'tokenize,mwt,pos,lemma,depparse'
@@ -81,6 +82,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             ud_drss = workingqueue.get_nowait()
             logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
             clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
+            clflines = [postprocessing.postprocess_clf(x) for x in clflines]
             with open(os.path.join(dpdir,'drsoutput.clf'), 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
             # change both of them to simplified files

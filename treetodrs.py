@@ -48,14 +48,13 @@ def add_denotation(t):
     t = copy.deepcopy(t)
     if t['upos'] in poswithnoden:
         if t['deprel'] == 'root':
-            lemmastring = t['lemma'].lower().replace("-","_").replace("exist","exst").replace(".","").replace("all","alll")
+            lemmastring = t['lemma']
             t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(lemmastring)))
                             for template in postemplates['EXTRA']]
         else:
             return t
     elif t['upos'] in postemplates.keys():
-        lemmastring = t['lemma'].lower().replace("-","_").replace("exist","exst").replace(".","").replace("all","alll")
-        lemmastring = lemmastring + "" if len(lemmastring)>1 else "_letter"
+        lemmastring = t['lemma']
         t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(lemmastring)))
                             for template in postemplates[t['upos']]]
     else:
