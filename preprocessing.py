@@ -45,8 +45,8 @@ def add_nulldeterminers(sentence):
                             and token['deprel'] != "amod")]
     for token in determinerless:
         sentence.append(conllu.models.Token({'id':token['id']-0.5,
-                            'form':'∅-def' if token['upos'] in ('PROPN','PRON') else '∅-indf',
-                            'lemma':'∅-def' if token['upos'] in ('PROPN','PRON') else '∅-indf',
+                            'form':'0def' if token['upos'] in ('PROPN','PRON') else '0indf',
+                            'lemma':'0def' if token['upos'] in ('PROPN','PRON') else '0indf',
                             'upos':'DET',
                             'xpos':None,
                             'feats':None,
