@@ -10,13 +10,9 @@ import preprocessing
 import treetodrs
 import clfutils
 
-stanzapipeline = None
-
-def get_stanza():
-    global stanzapipeline
-    if stanzapipeline is None:
-        stanzapipeline = stanza.Pipeline(lang='en', processors = 'tokenize,pos,lemma,depparse',logging_level="CRITICAL")
-    return stanzapipeline
+def get_stanza(language='en'):
+    procs = 'tokenize,pos,lemma,depparse' if language in ('en','nl') else 'tokenize,mwt,pos,lemma,depparse'
+    return stanza.Pipeline(lang=language, processors = procs,logging_level="CRITICAL")
 
 def getalldens_proc_wrapper(tree, queue, logfilepfx=None):
     if logfilepfx is not None:
@@ -31,18 +27,29 @@ def getalldens_proc_wrapper(tree, queue, logfilepfx=None):
 def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
-    toggle = 0
-    while toggle==0:
-        try:
-            stanzanlp = get_stanza()
-            toggle=1
-        except PermissionError:
-            continue
+    stanzanlp = {}
+    for language in ('en','de','it','nl'):
+        toggle = 0
+        while toggle==0:
+            try:
+                stanzanlp[language] = get_stanza(language=language)
+                toggle=1
+            except PermissionError:
+                continue
     queuetries = 0
     while True:
         try:
             dpname = queue.get_nowait()
             logging.info(dpname)
+            rightlang = ""
+            for language in ('en','de','it','nl'):
+                if language in dpname:
+                    rightlang = language
+                    break
+            if rightlang == "":
+                logging.warning(f"No language found for datapoint {dpname}.")
+                rightlang = "en"
+            logging.info(f"Assuming language {rightlang} for datapoint {dpname}.")
             dpdir = os.path.join(outdir,dpname.replace('\\','-').replace('/','-').replace('.',''))
             if not os.path.exists(dpdir):
                 os.mkdir(dpdir)
@@ -51,7 +58,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
                 textraw = f.read()
             logging.debug(f"Successfully read file for {dpname}.")
             # UD parse, and print to output file
-            ud_parse = conlluutils.stanza_to_conllu(stanzanlp(textraw))
+            ud_parse = conlluutils.stanza_to_conllu(stanzanlp[rightlang](textraw))
             ud_out = ud_parse.serialize()
             with open(os.path.join(dpdir,'udparse.conll'),mode='w') as f:
                 nlines = f.write(ud_out)
