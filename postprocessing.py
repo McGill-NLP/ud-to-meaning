@@ -1,4 +1,5 @@
 from nltk.sem.drt import *
+import clfutils
 
 tokensubs = []
 with open("tokensubs.csv") as f:
@@ -93,3 +94,7 @@ def postprocess_clf(clflines):
             guess_missing_relations(
                 guess_propn_type(
                 unclean_lemmas(clflines))))
+
+# DRS version of the previous; currently a bit of a cheater.
+def postprocess_drs(drs):
+    return clfutils.clf_to_drs(postprocess_clf(clfutils.drs_to_clf(drs)))
