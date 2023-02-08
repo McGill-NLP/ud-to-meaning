@@ -76,7 +76,7 @@ def process_cond(cond, mydrsname, counter):
 # it also returns an updated counter
 def drs_to_clf(drs, counter=0):
     if not isinstance(drs,DRS):
-        return [] if counter==0 else (counter, [])
+        return [] if counter==0 else ([],counter)
     istop = counter==0
     mydrsname = 'b'+str(counter)
     counter = counter + 1
