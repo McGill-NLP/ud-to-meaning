@@ -8,6 +8,8 @@ forall	_FORALL_
 \	_BACKSLASH_
 (	_LPAREN_
 )	_RPAREN_
+]	_LBRACKET_
+]	_RBRACKET_
 not	_NOT_
 !	_BANG_
 and	_AND_
