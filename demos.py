@@ -4,6 +4,7 @@ import conllu # for reading conllu files
 #os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 import conlluutils
 import preprocessing
+import postprocessing
 import treetodrs
 import clfutils
 import argparse
@@ -151,6 +152,8 @@ if __name__ == "__main__":
             if withtrace:
                 if returnall:
                     ans[2][0][0].pretty_print()
+                    print("\nFirst Computed DRS after postprocessing:")
+                    postprocessing.postprocess_drs(ans[2][0][0]).pretty_print()
                     if not os.path.exists(args.tracedir):
                         os.mkdir(args.tracedir)
                     for i in range(len(ans[2])):
@@ -159,10 +162,14 @@ if __name__ == "__main__":
                         tree.render(filename=None,cleanup=True,format="pdf",outfile=outfile)
                 else:
                     ans[2][0].pretty_print()
+                    print("\nFirst Computed DRS after postprocessing:")
+                    postprocessing.postprocess_drs(ans[2][0]).pretty_print()
                     tree = treetodrs.tracetogvtree(ans[2][1])
                     tree.render(filename=None,cleanup=True,format="pdf",outfile=args.tracefile + (".pdf" if not args.tracefile.endswith(".pdf") else ""))
             else:
                 ans[2].pretty_print()
+                print("\nFirst Computed DRS after postprocessing:")
+                postprocessing.postprocess_drs(ans[2]).pretty_print()
         if len(ans) > 3:
             print("\nOriginal PMB DRS for comparison:")
             ans[3].pretty_print()
