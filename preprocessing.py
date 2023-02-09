@@ -40,7 +40,7 @@ def switch_propnflattonmod(sentence):
 # no determiner is inserted if the noun is related to its head with the "amod" relation.
 def add_nulldeterminers(sentence):
     determinered = [sentence.filter(id=token['head'])[0] for token in sentence
-                        if (token['upos']=='DET' and token['deprel']=='det')]
+                        if (token['upos']=='DET' and token['deprel'].startswith('det'))]
     determinerless = [token for token in sentence
                         if (token['upos'] in ('NOUN','PROPN','PRON')
                             and token not in determinered
