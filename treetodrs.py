@@ -12,6 +12,7 @@ import logging
 from semtypes import *
 from conlluutils import *
 from preprocessing import *
+from sdrt import *
 
 # All the word denotation templates, and relation denotations,
 # are pairs of one SemType and one DRT expression (or template string for an expression)
@@ -36,7 +37,7 @@ for x in rellines:
     if x[1] == 'NA':
         relswithnoden.append(x[0])
     else:
-        relmeanings[x[0]].append((SemType.fromstring(x[1]),DrtExpression.fromstring(x[2])))
+        relmeanings[x[0]].append((SemType.fromstring(x[1]),SdrtExpression.fromstring(x[2])))
 
 # This function takes a Token as input
 # and returns a new Token
@@ -49,13 +50,13 @@ def add_denotation(t):
     if t['upos'] in poswithnoden:
         if t['deprel'] == 'root':
             lemmastring = t['lemma']
-            t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(lemmastring)))
+            t['word_dens'] = [(template[0],SdrtExpression.fromstring(template[1].format(lemmastring)))
                             for template in postemplates['EXTRA']]
         else:
             return t
     elif t['upos'] in postemplates.keys():
         lemmastring = t['lemma']
-        t['word_dens'] = [(template[0],DrtExpression.fromstring(template[1].format(lemmastring)))
+        t['word_dens'] = [(template[0],SdrtExpression.fromstring(template[1].format(lemmastring)))
                             for template in postemplates[t['upos']]]
     else:
         logging.warning("The word {} with ID {} is a POS with unknown denotation.".format(t['form'],str(t['id'])))
@@ -81,22 +82,22 @@ def add_denotation(t):
 def compute_conj(den1, den2, semtype):
     # There's a special proviso for semantic types ((et)t) and ((st)t)
     if semtype.like(SemType.fromstring('((ut)t)')):
-        conjden = DrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[Sub(y,x)]))) + G((\y.([],[Sub(y,x)]))))')
+        conjden = SdrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[Sub(y,x)]))) + G((\y.([],[Sub(y,x)]))))')
         return conjden(den1)(den2).simplify()
     # Deal with atomic types first
     if semtype == SemType.fromstring('t'):
         return den1 + den2
     if semtype.is_atomic():
-        return DrtExpression.fromstring(str(den1)+"-and-"+str(den2))
+        return SdrtExpression.fromstring(str(den1)+"-and-"+str(den2))
     # And a few other special cases
     if semtype.like(SemType.fromstring('(ut)')):
-        conjden = DrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')
+        conjden = SdrtExpression.fromstring(r'\F.\G.\x.(F(x)+G(x))')
         return conjden(den1)(den2).simplify()
     if semtype.like(SemType.fromstring('(u(st))')):
-        conjden = DrtExpression.fromstring(r'\F.\G.\x.\y.(F(x,y)+G(x,y))')
+        conjden = SdrtExpression.fromstring(r'\F.\G.\x.\y.(F(x,y)+G(x,y))')
         return conjden(den1)(den2).simplify()
     if semtype.like(SemType.fromstring('(e(e(st)))')):
-        conjden = DrtExpression.fromstring(r'\F.\G.\x.\y.\z.(F(x,y,z)+G(x,y,z))')
+        conjden = SdrtExpression.fromstring(r'\F.\G.\x.\y.\z.(F(x,y,z)+G(x,y,z))')
         return conjden(den1)(den2).simplify()
     logging.warning(f"Not currently able to handle conjunctions of things of type {semtype}")
     # Now we (attempt to) deal with types that are functions from somewhere to somewhere else.
@@ -110,12 +111,12 @@ def compute_conj(den1, den2, semtype):
         x = DrtVariableExpression(unique_variable())
         xstr = str(x)
         recursivecallstr = str(compute_conj(den1(a).simplify(),den2(b).simplify(),semtype.get_right()))
-        return DrtExpression.fromstring(rf'\{xstr}.({recursivecallstr}+([{astr} {bstr}],[Sub({astr},{xstr}) Sub({bstr},{xstr})]))').simplify()
+        return SdrtExpression.fromstring(rf'\{xstr}.({recursivecallstr}+([{astr} {bstr}],[Sub({astr},{xstr}) Sub({bstr},{xstr})]))').simplify()
     else:
         x = DrtVariableExpression(unique_variable())
         xstr = str(x)
         recursivecallstr = str(compute_conj(den1(x).simplify(),den2(x).simplify(),semtype.get_right()))
-        return DrtExpression.fromstring(rf'\{xstr}.{recursivecallstr}').simplify()
+        return SdrtExpression.fromstring(rf'\{xstr}.{recursivecallstr}').simplify()
 
 # This function takes four inputs:
 # start is any type of thing, but usually a SemType
