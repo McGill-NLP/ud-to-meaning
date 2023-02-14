@@ -25,7 +25,7 @@ def getalldens_proc_wrapper(tree, queue, logfilepfx=None):
         logging.exception(str(e))
     return
 
-def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=None):
+def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,workingqueue,logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     stanzanlp = {}
@@ -84,21 +84,24 @@ def parsepmb_proc(datapointpathdict,outdir,queue,list,workingqueue,logfilepfx=No
             clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
             # add one always-there useless parse
             clflines = [postprocessing.postprocess_clf(x) for x in clflines] + [["b0 REF x1"]]
-            with open(os.path.join(dpdir,'drsoutput.clf'), 'w',encoding='utf8') as f:
+            fulldrsname = os.path.join(dpdir,'drsoutput.clf')
+            with open(fulldrsname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
             # change both of them to simplified files
             simplifieddrsname = os.path.join(dpdir,'drsoutputsimple.clf')
             with open(simplifieddrsname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(clfutils.simplify_clf(x)) for x in clflines]))
             pmbclf = ''
-            with open(datapointpathdict[dpname]['drs']) as f:
+            fullpmbname = datapointpathdict[dpname]['drs']
+            with open(fullpmbname) as f:
                 pmbclf = f.read()
             pmbclflines = pmbclf.split('\n')
             simplifiedpmbname = os.path.join(dpdir, "pmbsimple.clf")
             with open(simplifiedpmbname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n'.join(clfutils.simplify_clf(pmbclflines)))
             logging.debug(f"Successfully performed DRS simplification for {dpname}.")
-            list.append((simplifiedpmbname,simplifieddrsname))
+            outlistsimple.append((simplifiedpmbname,simplifieddrsname))
+            outlistfull.append((fullpmbname,fulldrsname))
         except EmptyException:
             return
         except ConnectionError:
@@ -124,9 +127,10 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
     datainputqueue = man.Queue()
     for datapoint in datapointpathdict.keys():
         datainputqueue.put(datapoint)
-    dataoutputlist = man.list()
+    dataoutputlistsimple = man.list()
+    dataoutputlistfull = man.list()
     workingqueues = [man.Queue()  for i in range(nproc)]
-    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlist,workingqueues[i],f"{logfilepfx}-proc{i}"), daemon=False) for i in range(nproc)]
+    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistsimple,dataoutputlistfull,workingqueues[i],(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None)), daemon=False) for i in range(nproc)]
     logging.info(f"Successfully created the {nproc} parsing processes.")
     for proc in procs:
         proc.start()
@@ -137,19 +141,23 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
     logging.info("All parsing processes have finished.")
     if logfilepfx is not None:
         logging.basicConfig(force=True)
-    return list(dataoutputlist)
+    return list(dataoutputlistsimple), list(dataoutputlistfull)
 
 if __name__ == "__main__":
     freeze_support()
     parser = argparse.ArgumentParser(description="Run UD parsing and then conversion to PMB for a batch of files.")
     parser.add_argument("-p","--pmbdir",action="store",required=True,dest="pmbdir",help="the directory to (recursively) search for input PMB files")
     parser.add_argument("-o","--outdir",action="store",required=True,dest="outdir",help="the directory in which to write output files")
-    parser.add_argument("-f","--outfile",action="store",required=False,dest="outfile",help="the file to write file pairs for evaluation")
+    parser.add_argument("-s","--simpleoutfile",action="store",required=False,dest="simpleoutfile",help="the file to write simplified file pairs for evaluation")
+    parser.add_argument("-f","--fulloutfile",action="store",required=False,dest="fulloutfile",help="the file to write full file pairs for evaluation")
     parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the parsing?")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings will be added")
     args = parser.parse_args()
-    filepairs = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),logfilepfx=args.logfilepfx)
-    if args.outfile is not None:
-        with open(args.outfile,"w") as f:
-            f.write('\n'.join(['\t'.join(x) for x in filepairs]))
+    filepairssimple, filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),logfilepfx=args.logfilepfx)
+    if args.simpleoutfile is not None:
+        with open(args.simpleoutfile,"w") as f:
+            f.write('\n'.join(['\t'.join(x) for x in filepairssimple]))
+    if args.fulloutfile is not None:
+        with open(args.fulloutfile,"w") as f:
+            f.write('\n'.join(['\t'.join(x) for x in filepairsfull]))
 
