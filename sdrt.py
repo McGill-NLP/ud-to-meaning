@@ -8,51 +8,14 @@
 #
 # Edited by Laurestine Bradford for SDRT for PMB.
 
-import operator
 from functools import reduce
-from itertools import chain
 
 from nltk.sem.logic import (
-    APP,
-    AbstractVariableExpression,
-    AllExpression,
-    AndExpression,
-    ApplicationExpression,
-    BinaryExpression,
-    BooleanExpression,
-    ConstantExpression,
-    EqualityExpression,
-    EventVariableExpression,
-    ExistsExpression,
     Expression,
-    FunctionVariableExpression,
-    ImpExpression,
-    IndividualVariableExpression,
-    LambdaExpression,
-    LogicParser,
-    NegatedExpression,
-    OrExpression,
-    Tokens,
-    Variable,
-    is_eventvar,
-    is_funcvar,
-    is_indvar,
-    unique_variable,
     TRUTH_TYPE,
 )
 
 from nltk.sem.drt import *
-
-# Import Tkinter-based modules if they are available
-try:
-    from tkinter import Canvas, Tk
-    from tkinter.font import Font
-
-    from nltk.util import in_idle
-
-except ImportError:
-    # No need to print a warning here, nltk.draw has already printed one.
-    pass
 
 class SdrtTokens(DrtTokens):
     BACKGROUND = "_BACKGROUND_"
