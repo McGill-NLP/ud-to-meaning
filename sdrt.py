@@ -142,7 +142,7 @@ class SdrtBoxRelationExpression(SdrtExpression):
         return combinator([function(self.drs)])
     
     def simplify(self):
-        return self
+        return SdrtBoxRelationExpression(self.relation,self.drs.simplify())
 
     @property
     def type(self):
