@@ -49,7 +49,7 @@ def add_nulldeterminers(sentence):
         sentence.append(conllu.models.Token({'id':token['id']-0.5,
                             'form':'0def' if token['upos'] in ('PROPN','PRON') else '0indf',
                             'lemma':'0def' if token['upos'] in ('PROPN','PRON') else '0indf',
-                            'upos':'DET',
+                            'upos':'DET-DEF' if token['upos'] in ('PROPN','PRON') else 'DET-INDEF',
                             'xpos':None,
                             'feats':None,
                             'head':token['id'],
