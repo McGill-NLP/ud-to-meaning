@@ -1,4 +1,5 @@
 from nltk.sem.drt import *
+from sdrt import *
 import re # helps in simplify_clf
 
 argrelations = ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Theme","Co_Agent","Co-Theme","Co-Agent","Stimulus", "Creator", "User", "Of")
@@ -8,7 +9,14 @@ argrelations = ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_
 # and a counter saying what names are still available for future DRS boxes.
 # It returns a list of clauses and an updated counter.
 def process_cond(cond, mydrsname, counter):
-    if isinstance(cond,DrtApplicationExpression):
+    if isinstance(cond,SdrtBoxRelationExpression):
+        rel = cond.relation
+        embdrs = cond.drs
+        embname = 'b'+str(counter)
+        newline = f'{mydrsname} {rel} {embname}'
+        newlines, counter = drs_to_clf(embdrs,counter)
+        return [newline] + newlines, counter
+    elif isinstance(cond,DrtApplicationExpression):
         function, args = cond.uncurry()
         return([f'{mydrsname} {function} ' + ' '.join(str(x) for x in args)], counter)
     elif isinstance(cond,DrtProposition):
