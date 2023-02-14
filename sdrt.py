@@ -169,8 +169,8 @@ class SdrtBoxRelationExpression(SdrtExpression):
         return self.drs.free()
 
     def replace(self, variable, expression, replace_bound=False, alpha_convert=True):
-            return DrtProposition(
-                self.variable,
+            return SdrtBoxRelationExpression(
+                self.relation,
                 self.drs.replace(variable, expression, replace_bound, alpha_convert),
             )
 
@@ -178,9 +178,8 @@ class SdrtBoxRelationExpression(SdrtExpression):
         """:see: Expression.visit()"""
         return combinator([function(self.drs)])
     
-#    def visit_structured(self, function, combinator):
-#        """:see: Expression.visit_structured()"""
-#        return combinator([function(self.drs)])
+    def simplify(self):
+        return self
 
     @property
     def type(self):
