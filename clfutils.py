@@ -31,7 +31,7 @@ def process_cond(cond, mydrsname, counter):
     elif isinstance(cond,DrtNegatedExpression):
         embterm = cond.term
         embname = 'b'.str(counter)
-        newline = f'{mydrsname} NOT {embname}'
+        newline = f'{mydrsname} NEGATION {embname}'
         if not isinstance(embterm,DRS):
             counter = counter + 1
         newlines, counter = process_cond(embterm,embname,counter)
