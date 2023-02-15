@@ -105,22 +105,51 @@ def drses_to_clf(drslist):
 # Converting Simplified Box Notation to CLF format.
 def sbn_to_clf(sbnlines):
     try:
+        currentindex = 0
+        currentbox = f'b{currentindex}'
+        currentvariable = 0
+        currentvariablename = f'x{currentvariable}'
         commentsplit = [x.split("%") for x in sbnlines]
         nonemptylines = [x[0].strip() for x in commentsplit if len(x)>0]
         nonemptylines = [x for x in nonemptylines if len(x)>0]
-        variables = ["x"+str(i) for i in range(1,len(nonemptylines)+1)]
-        clflines = [f"b0 REF {x}" for x in variables]
-        for i in range(len(nonemptylines)):
-            predlong = nonemptylines[i].split(' ')[0]
+        variables = []
+        boxrels = [[currentbox,'']] # unlike variables, we start out with a box there
+        for line in nonemptylines:
+            if line.split()[0].isupper():
+                currentindex += 1
+                currentbox = f'b{currentindex}'
+                boxrels.append([currentbox, line])
+            else:
+                variables.append([currentbox, currentvariablename, line])
+                currentvariable += 1
+                currentvariablename = f'x{currentvariable}'
+        boxes = [x for x,y in boxrels]
+        clflines = [f"{var[0]} REF {var[1]}" for var in variables]
+        for i in range(len(boxrels)):
+            if boxrels[i][1]: # skip the first one, with an empty relation
+                box = boxrels[i][0]
+                rel, argpos = boxrels[i][1].split()
+                otherboxind = i + ((-1 if (argpos.startswith('<') or argpos.startswith('-')) else 1)*int(argpos[1:]))
+                otherbox = boxrels[otherboxind][0]
+                clflines.append(f"{otherbox} {rel} {box}")
+        # describe.v.01               Proposition <1
+        for i in range(len(variables)):
+            box, variable, predicates = variables[i]
+            predlong = predicates.split(' ')[0]
             predshort, synset = predlong.split('.')[0], '.'.join(predlong.split('.')[1:])
-            clflines.append(f"b0 {predshort} \"{synset}\" {variables[i]}")
-            relparts = [x for x in nonemptylines[i].split(' ')[1:] if len(x)>0]
+            clflines.append(f"{box} {predshort} \"{synset}\" {variable}")
+
+            relparts = [x for x in predicates.split(' ')[1:] if len(x)>0]
             relations_var = [(relparts[j],int(relparts[j+1])) for j in range(0,len(relparts)-1,2) if relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit()]
-            relations_const = [(relparts[j],relparts[j+1]) for j in range(0,len(relparts)-1,2) if not (relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit())]
-            clflines = clflines + [f"b0 {x} {variables[i]} {variables[i+y]}" for x,y in relations_var]
-            clflines = clflines + [f"b0 {x} {variables[i]} \"{y}\"" for x,y in relations_const]
+            relations_prop = [(relparts[j],(-1 if relparts[j+1].startswith('<') else 1)*int(relparts[j+1][1:])) for j in range(0,len(relparts)-1,2) if relparts[j+1][0] in ('<','>') and relparts[j+1][1:].isdigit()]
+            relations_const = [(relparts[j],relparts[j+1]) for j in range(0,len(relparts)-1,2) if not (relparts[j+1][0] in ('+','-','<','>') and relparts[j+1][1:].isdigit())]
+            relations_const = [(x,y[1:-1]) for x,y in relations_const if y.startswith('"') and y.endswith('"')] + [(x,y) for x,y in relations_const if not(y.startswith('"') and y.endswith('"'))] 
+
+            clflines = clflines + [f"{box} {x} {variable} {variables[i+y][1]}" for x,y in relations_var]
+            clflines = clflines + [f"{box} {x} {variable} \"{y}\"" for x,y in relations_const]
+            clflines = clflines + [f"{box} {x} {variable} {boxes[boxes.index(box)+y]}" for x,y in relations_prop]
         return clflines
-    except Exception:
+    except Exception as e:
         return []
 
 def simplify_clf(clflines):
