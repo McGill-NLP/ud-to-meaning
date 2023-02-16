@@ -19,7 +19,7 @@ from sdrt import *
 # We read them from the files.
 poslines = []
 with open("postemplates.csv") as f:
-    poslines = [x.split('\t') for x in f.read().split('\n')]
+    poslines = [x.split('\t') for x in f.read().split('\n') if len(x)>0]
 postemplates = dict((x[0],[]) for x in poslines)
 poswithnoden = []
 for x in poslines:
@@ -30,7 +30,7 @@ for x in poslines:
 
 rellines = []
 with open("reldenotations.csv") as f:
-    rellines = [x.split('\t') for x in f.read().split('\n')]
+    rellines = [x.split('\t') for x in f.read().split('\n') if len(x)>0]
 relmeanings = dict((x[0],[]) for x in rellines)
 relswithnoden = []
 for x in rellines:
