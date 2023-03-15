@@ -78,14 +78,14 @@ def guess_missing_relations(clflines):
     return [' '.join(x) for x in clflinessplit]
 
 
-# Guesses missing information about proper nouns. (Assigning all to female.n.02 as UD-Boxer does.)
+# Guesses missing information about proper nouns. (Assigning all to person.n.02 as UD-Boxer does.)
 def guess_propn_type(clflines):
     clflinessplit = [[x.split()[0],x.split()[1],' '.join(x.split()[2:])] for x in clflines if len(x.split())>1]
     for line in clflinessplit:
         if line[1]=='PROPN_PROPERTY':
-            line[1] = 'female "n.02"'
+            line[1] = 'person "n.02"'
         if line[1]=='PRONOUN_PROPERTY':
-            line[1] = 'female "n.02"'
+            line[1] = 'person "n.02"'
     return [' '.join(x) for x in clflinessplit]
 
 
