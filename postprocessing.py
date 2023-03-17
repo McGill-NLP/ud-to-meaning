@@ -76,6 +76,10 @@ def guess_missing_relations(clflines):
             line[1] = 'Quantity'
         elif line[1]=='ARG_TMOD':
             line[1] = 'Quantity'
+        elif line[1]=='NUM_RELATION':
+            line[1] = 'Quantity'
+        elif line[1]=='NUM_PROPERTY':
+            line[1] = 'quantity.n.01'
     return [' '.join(x) for x in clflinessplit]
 
 
