@@ -89,7 +89,9 @@ def preprocess(sentence):
                 flatten_relation_list(
                     flatten_relation_list(
                         switch_propnflattonmod(
-                            sentence
+                            remove_multitokens(
+                                sentence
+                            )
                         ),
                     'flat'
                     ),
