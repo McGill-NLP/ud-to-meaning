@@ -70,10 +70,15 @@ EXTRA	(e(st))	\x.\y.([],[{}(y),ARG1(y,x)])
 EXTRA	(e(e(st)))	\x.\y.\z.([],[{}(z),ARG1(z,x),ARG2(z,y)])
 EXTRA	(e(e(t(st))))	\x.\y.\z.\w.([u],[{}(w),ARG1(w,x),ARG2(w,u),u:z])
 EXTRA	(e(t(st)))	\x.\y.\z.([u],[{}(z),ARG1(z,x),ARG2(z,u),u:y])
+PART	(tt)	\A.(([],[-A]))
+PART	(e(et))	\x.\y.([],[{}(y,x)])
+PART	(e(st))	\x.\y.([],[{}(y,x)])
+PART	(et)	\x.([],[{}(x)])
+PART	(st)	\x.([],[{}(x)])
+PART	(s(st))	\x.\y.([],[{}(x,y)])
 CCONJ	NA	NA
 PUNCT	NA	NA
 INTJ	NA	NA
 SYM	NA	NA
-PART	NA	NA
 X	NA	NA
 AUX	NA	NA

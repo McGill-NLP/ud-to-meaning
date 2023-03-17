@@ -1,5 +1,6 @@
 nsubj	((j(st))(((et)t)(st)))	\F G y.G(\x.F(x,y))
 nsubj	((j(st))(((et)t)(j(st))))	\F G.F
+nsubj	((b(st))(((et)t)(b(st))))	\F G.F
 nsubj	((et)(((et)t)t))	\F G.G(F)
 nsubj	((st)(((et)t)(st)))	\F G z.G(\x.(([],[ARG_NSUBJ(z,x)]) + F(z)))
 nsubj	((j(b(st)))(((et)t)(b(st))))	\F G y z.G(\x.F(x,y,z))
@@ -41,6 +42,8 @@ advmod	((st)((s(st))(st)))	\F G x.(([y],[]) + F(x) + G(x,y))
 advmod	((e(st))((s(st))(e(st))))	\F G x z.(([y],[]) + F(x,z) + G(z,y))
 advmod	((et)((et)(et)))	\F G x.(F(x) + G(x))
 advmod	((st)((st)(st)))	\F G x.(F(x) + G(x))
+advmod	((st)((tt)(st)))	\F G x.(G(F(x)))
+advmod	((et)((tt)(et)))	\F G x.(G(F(x)))
 obl	((st)((st)(st)))	\F G x.(F(x) + G(x))
 obl	((e(st))((st)(e(st))))	\F G x y.(F(x,y) + G(y))
 obl	((et)((et)(et)))	\F G x.(F(x) + G(x))
