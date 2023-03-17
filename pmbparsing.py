@@ -10,6 +10,7 @@ import preprocessing
 import treetodrs
 import clfutils
 import postprocessing
+from tqdm import tqdm
 
 def get_stanza(language='en'):
     procs = 'tokenize,pos,lemma,depparse' if language in ('en','nl') else 'tokenize,mwt,pos,lemma,depparse'
@@ -116,7 +117,7 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
-    for path, _, files in os.walk(pmbdir):
+    for path, _, files in tqdm(os.walk(pmbdir)):
         pmbfiles = pmbfiles + [os.path.join(path,x) for x in files]
     datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
     datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off','raw':x+'.raw'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles and x+'.raw' in pmbfiles)
