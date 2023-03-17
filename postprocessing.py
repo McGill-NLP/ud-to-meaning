@@ -69,8 +69,6 @@ def guess_missing_relations(clflines):
             line[1] = 'Manner'
         elif line[1]=='ARG2_ADJ':
             line[1] = 'Stimulus'
-        elif line[1]=='NUM_RELATION':
-            line[1] = 'Number'
         elif line[1]=='TIMEREL':
             line[1] = 'TPR'
         elif line[1]=='ARG_NPMOD':
