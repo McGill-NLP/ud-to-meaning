@@ -5,12 +5,16 @@ def stanza_to_conllu(doc):
     ud_dict = doc.to_dict()[0]
     for x in ud_dict:
         x['form'] = x['text']
+        if 'feats' in x.keys() and x['feats']:
+            x['feats'] = dict((y.split('=')[0],y.split('=')[1]) for y in x['feats'].split('|'))
+        else:
+            x['feats'] = None
     try:
         ud_parse = conllu.TokenList(ud_dict)
         tree = ud_parse.to_tree()
     # In case the TokenList is ill-formed.
     except conllu.exceptions.ParseException:
-        return conllu.TokenList([dict(id=1,form='event',lemma='event',upos='VERB',xpos='',feats='',head=0,deprel='root')])
+        return conllu.TokenList([dict(id=1,form='event',lemma='event',upos='VERB',xpos='',feats={},head=0,deprel='root')])
     return ud_parse
 
 # This function takes a TokenTree as input,
