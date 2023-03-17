@@ -121,6 +121,14 @@ mark	((st)((t(tt))(tt)))	\F G x.G(x,(([y],[]) + F(y)))
 mark	(t((t(tt))(tt)))	\y G x.G(x,y)
 nmod:poss	((et)(((et)t)(et)))	\F G x.(F(x) + G(\y.([],[ARG_POSS(x,y)])))
 conj	(?(??))	([],[])
+cop	((et)(?(et)))	\F G x.F(x)
+cop	((st)(?(st)))	\F G x.F(x)
+cop	((b(st))(?(b(st))))	\F G x y.F(x,y)
+cop	((j(st))(?(j(st))))	\F G x y.F(x,y)
+cop	((i(st))(?(i(st))))	\F G x y.F(x,y)
+cop	(((et)t)(?((et)t)))	\F G H.F(H)
+cop	((s(st))((j(st))(j(st))))	\F G x z.(([y],[]) + G(x,z) + F(z,y))
+cop	(((et)t)((j(b(st)))(j(st))))	\F G y z.F(\x.G(y,x,z))
 cc	NA	NA
 punct	NA	NA
 discourse	NA	NA
@@ -136,6 +144,5 @@ list	NA	NA
 expl:pv	NA	NA
 aux	NA	NA
 appos	NA	NA
-cop	NA	NA
 orphan	NA	NA
 fixed	NA	NA

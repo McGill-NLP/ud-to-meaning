@@ -32,7 +32,7 @@ def guess_wordnet_synsets(clflines):
             POS = line[1].split('_')[1]
             feats = line[1].split('_')[2]
             POSshort = ""
-            if POS=='VERB':
+            if POS=='VERB' or POS=='AUX':
                 POSshort='v'
             if POS=='NOUN':
                 POSshort='n'
@@ -58,8 +58,10 @@ def guess_missing_relations(clflines):
             line[1] = 'User'
         elif line[1]=='ARG1_VERB' or line[1]=='ARG_NSUBJ' or line[1]=='ARG1':
             line[1] = 'Agent'
-        elif line[1]=='ARG2_VERB' or line[1]=='ARG_OBJ' or line[1]=='ARG2':
+        elif line[1]=='ARG2_VERB' or line[1]=='ARG_OBJ' or line[1]=='ARG2' or line[1]=='ARG1_AUX':
             line[1] = 'Theme'
+        elif line[1]=='ARG2_AUX':
+            line[1] = 'Co-Theme'
         elif line[1]=='ARG3':
             line[1] = 'Recipient'
         elif line[1]=='ADJ_RELATION':

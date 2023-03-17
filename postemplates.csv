@@ -76,9 +76,10 @@ PART	(e(st))	\x.\y.([],[{}(y,x)])
 PART	(et)	\x.([],[{}(x)])
 PART	(st)	\x.([],[{}(x)])
 PART	(s(st))	\x.\y.([],[{}(x,y)])
+AUX	(j(st))	\x.\y.([],[FINDWORDNET_AUX_{}_{}(y),ARG1_AUX(y,x)])
+AUX	(j(b(st)))	\x.\y.\z.([],[FINDWORDNET_AUX_{}_{}(z),ARG1_AUX(z,x),ARG2_AUX(z,y)])
 CCONJ	NA	NA
 PUNCT	NA	NA
 INTJ	NA	NA
 SYM	NA	NA
 X	NA	NA
-AUX	NA	NA
