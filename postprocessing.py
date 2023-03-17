@@ -1,5 +1,6 @@
 from nltk.sem.drt import *
 import clfutils
+import re # helps with adding tense
 
 tokensubs = []
 with open("tokensubs.csv") as f:
@@ -25,9 +26,7 @@ def unclean_lemmas(clflines):
 def guess_wordnet_synsets(clflines):
     clflinessplit = [[x.split()[0],x.split()[1],' '.join(x.split()[2:])] for x in clflines if len(x.split())>1]
     for line in clflinessplit:
-        if line[1]=="FINDWORDNET_ROOT_time":
-            line[1]='time "n.08"'
-        elif line[1].startswith("FINDWORDNET"):
+        if line[1].startswith("FINDWORDNET"):
             lemma = '_'.join(line[1].split('_')[3:])
             POS = line[1].split('_')[1]
             feats = line[1].split('_')[2]
@@ -84,6 +83,41 @@ def guess_missing_relations(clflines):
             line[1] = 'quantity.n.01'
     return [' '.join(x) for x in clflinessplit]
 
+# Guess what tense any verbs/auxiliaries are in and adds the times for those.
+def guess_tenses(clflines):
+    # Time(x,t),TIMEREL(t,"now"),FINDWORDNET_ROOT_time(t)
+    clflinessplit = [[x.split()[0],x.split()[1],' '.join(x.split()[2:])] for x in clflines if len(x.split())>1]
+    usednumbers = [int(x) for x in re.findall(r'\d+',' '.join(clflines))]
+    nextnumber = max(usednumbers)+1
+    extralines = []
+    for line in clflinessplit:
+        if line[1].startswith('FINDWORDNET_VERB') or line[1].startswith('FINDWORDNET_AUX'):
+            verbvar = line[2].split()[0]
+            if "Tense;Past" in line[1]:
+                timevar = f"t{nextnumber}"
+                nextnumber = nextnumber + 1
+                extralines.append(f"{line[0]} Time {verbvar} {timevar}")
+                extralines.append(f'{line[0]} time "n.08" {timevar}')
+                extralines.append(f'{line[0]} TPR {timevar} "now"')
+            elif "Tense;Pres" in line[1]:
+                timevar = f"t{nextnumber}"
+                nextnumber = nextnumber + 1
+                extralines.append(f"{line[0]} Time {verbvar} {timevar}")
+                extralines.append(f'{line[0]} time "n.08" {timevar}')
+                extralines.append(f'{line[0]} EQU {timevar} "now"')
+            elif "Tense;Fut" in line[1]:
+                timevar = f"t{nextnumber}"
+                nextnumber = nextnumber + 1
+                extralines.append(f"{line[0]} Time {verbvar} {timevar}")
+                extralines.append(f'{line[0]} time "n.08" {timevar}')
+                extralines.append(f'{line[0]} TSU {timevar} "now"')
+            elif "VerbForm;Fin" in line[1]:
+                timevar = f"t{nextnumber}"
+                nextnumber = nextnumber + 1
+                extralines.append(f"{line[0]} Time {verbvar} {timevar}")
+                extralines.append(f'{line[0]} time "n.08" {timevar}')
+                extralines.append(f'{line[0]} TPR {timevar} "now"')
+    return clflines + extralines
 
 # Guesses missing information about proper nouns. (Assigning all to person.n.02 as UD-Boxer does.)
 def guess_propn_type(clflines):
@@ -130,8 +164,9 @@ def guess_propn_type(clflines):
 def postprocess_clf(clflines):
     return guess_wordnet_synsets(
             guess_missing_relations(
-                guess_propn_type(
-                unclean_lemmas(clflines))))
+            guess_tenses(
+            guess_propn_type(
+            unclean_lemmas(clflines)))))
 
 # DRS version of the previous; currently a bit of a cheater.
 def postprocess_drs(drs):

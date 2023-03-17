@@ -106,7 +106,7 @@ advcl	((b(st))((s(st))(b(st))))	\F G x y.(([z],[]) + F(x,y) + G(y,z))
 advcl	((st)((st)(st)))	\F G x.(F(x) + G(x))
 advcl	((b(st))((tt)(b(st))))	\F G x y.G(F(x,y))
 advcl	((b(st))(((et)t)(b(st))))	\F G x y.(F(x,y) + G(\z.([],[EQU(x,z)])))
-root	(t((st)t))	\F.(([x,t],[Time(x,t),TIMEREL(t,"now"),FINDWORDNET_ROOT_time(t)]) + F(x))
+root	(t((st)t))	\F.(([x],[]) + F(x))
 root	(t(tt))	\x.x
 root	(t((et)t))	\F.(([x],[]) + F(x))
 root	(t(((et)t)t))	\F.(F(\x.([],[])))
