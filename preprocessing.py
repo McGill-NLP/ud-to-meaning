@@ -72,6 +72,12 @@ def clean_lemmas(sentence):
         token['lemma'] = token['lemma'] + ("" if len(token['lemma'])>1 else "_LETTER")
     return conllu.TokenList(sentence)
 
+# Remove multi-token tokens
+def remove_multitokens(sentence):
+    sentence = [x for x in sentence if isinstance(x['id'],int)]
+    sentence = conllu.TokenList(sentence)
+    return reindex_tokenlist(sentence)
+
 # This combines all the previous steps in the correct order.
 # So, it changes flat relations between Nouns and Proper Nouns to "amod" relations (for semantic reasons),
 # flattens remaining "flat" relations,
