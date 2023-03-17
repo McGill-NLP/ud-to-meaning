@@ -28,8 +28,9 @@ def guess_wordnet_synsets(clflines):
         if line[1]=="FINDWORDNET_ROOT_time":
             line[1]='time "n.08"'
         elif line[1].startswith("FINDWORDNET"):
-            lemma = '_'.join(line[1].split('_')[2:])
+            lemma = '_'.join(line[1].split('_')[3:])
             POS = line[1].split('_')[1]
+            feats = line[1].split('_')[2]
             POSshort = ""
             if POS=='VERB':
                 POSshort='v'
@@ -81,12 +82,43 @@ def guess_missing_relations(clflines):
 # Guesses missing information about proper nouns. (Assigning all to person.n.02 as UD-Boxer does.)
 def guess_propn_type(clflines):
     clflinessplit = [[x.split()[0],x.split()[1],' '.join(x.split()[2:])] for x in clflines if len(x.split())>1]
+    extralines = []
     for line in clflinessplit:
-        if line[1]=='PROPN_PROPERTY':
-            line[1] = 'person "n.02"'
-        if line[1]=='PRONOUN_PROPERTY':
-            line[1] = 'person "n.02"'
-    return [' '.join(x) for x in clflinessplit]
+        if line[1].startswith('PROPN_PROPERTY'):
+            if "Gender;Fem" in line[1]:
+                line[1] = 'female "n.02"'
+            elif "Gender;Masc" in line[1]:
+                line[1] = 'male "n.02"'
+            elif "Gender;Neut" in line[1]:
+                line[1] = 'entity "n.01"'
+            else:
+                line[1] = 'person "n.01"'
+        if line[1].startswith('PRONOUN_PROPERTY'):
+            if "Person;1" in line[1]:
+                if "Number;Plur" in line[1]:
+                    # we
+                    line[1] = 'person "n.01"'
+                    # add a this-guy-Sub-speaker line
+                    extralines.append(' '.join((line[0],'Sub',line[2].split()[0],'"speaker"',' '.join(line[2].split()[1:]))))
+                else:
+                    # I
+                    line[1] = 'person "n.01"'
+                    # add a this-guy-EQU-speaker line
+                    extralines.append(' '.join((line[0],'EQU',line[2].split()[0],'"speaker"',' '.join(line[2].split()[1:]))))
+            elif "Person;2" in line[1]:
+                # you
+                line[1] = 'person "n.01"'
+                # add a this-guy-EQU-hearer line
+                extralines.append(' '.join((line[0],'EQU',line[2].split()[0],'"hearer"',' '.join(line[2].split()[1:]))))
+            elif "Gender;Fem" in line[1]:
+                line[1] = 'female "n.02"'
+            elif "Gender;Masc" in line[1]:
+                line[1] = 'male "n.02"'
+            elif "Gender;Neut" in line[1]:
+                line[1] = 'entity "n.01"'
+            else:
+                line[1] = 'person "n.01"'
+    return [' '.join(x) for x in clflinessplit] + extralines
 
 
 def postprocess_clf(clflines):
