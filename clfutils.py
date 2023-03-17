@@ -30,7 +30,7 @@ def process_cond(cond, mydrsname, counter):
         return drs_to_clf(cond,counter)
     elif isinstance(cond,DrtNegatedExpression):
         embterm = cond.term
-        embname = 'b'.str(counter)
+        embname = 'b'+str(counter)
         newline = f'{mydrsname} NEGATION {embname}'
         if not isinstance(embterm,DRS):
             counter = counter + 1
