@@ -114,6 +114,7 @@ mark	((e(st))((e(tt))(et)))	\F G x.G(x,(([y,z],[]) + F(y,z)))
 mark	((st)((e(tt))(et)))	\F G x.G(x,(([y],[]) + F(y)))
 mark	((st)(?(st)))	\F G x.F(x)
 mark	((et)(?(et)))	\F G x.F(x)
+mark	((e(st))(?(e(st))))	\F G x.F(x)
 mark	(t(?t))	\x y.x
 mark	((e(st))((s(st))(e(s(st)))))	\F G x y z.(F(x,z) + G(y,z))
 mark	((st)((s(st))(s(st))))	\F G x y.(F(y) + G(x,y))
