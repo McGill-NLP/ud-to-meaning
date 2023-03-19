@@ -76,6 +76,8 @@ def process_cond(cond, mydrsname, counter):
         newlines2, counter = process_cond(embterm2,embname2,counter)
         newline = f'{mydrsname} {cond.getOp()} {embname1} {embname2}'
         return  [newline] + newlines1 + newlines2, counter
+    else:
+        return [], counter
 
 # Converting NLTK DRS data structures to lists of clauses for CLF format.
 # It takes as input a DRS from the DRT module,
