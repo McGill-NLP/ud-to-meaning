@@ -56,6 +56,7 @@ def process_cond(cond, mydrsname, counter):
             counter = counter + 1
         newlines1, counter = process_cond(embterm1,embname1,counter)
         embterm2 = cond.second
+        embname2 = 'b'+str(counter)
         if not isinstance(embterm2,DRS):
             counter = counter + 1
         newlines2, counter = process_cond(embterm2,embname2,counter)
