@@ -16,17 +16,17 @@ def get_stanza(language='en'):
     procs = 'tokenize,pos,lemma,depparse' if language in ('en','nl') else 'tokenize,mwt,pos,lemma,depparse'
     return stanza.Pipeline(lang=language, processors = procs,logging_level="CRITICAL")
 
-def getalldens_proc_wrapper(tree, queue, logfilepfx=None):
+def getalldens_proc_wrapper(tree, queue, withtrace=False, logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     try:
-        dens = treetodrs.getalldens(tree)
+        dens = treetodrs.getalldens(tree,withtrace)
         queue.put(dens)
     except Exception as e:
         logging.exception(str(e))
     return
 
-def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,workingqueue,logfilepfx=None):
+def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,workingqueue,storetypes=False,logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     stanzanlp = {}
@@ -72,7 +72,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,worki
             logging.debug(f"Successfully performed UD preprocessing for {dpname}.")
             # DRSs to an output file
             #ud_drss = treetodrs.getalldens(preprocessed)
-            treetodrsproc = Process(target=getalldens_proc_wrapper,args=(preprocessed,workingqueue,os.path.join(dpdir,'treetodrslog')),daemon=True)
+            treetodrsproc = Process(target=getalldens_proc_wrapper,args=(preprocessed,workingqueue,storetypes,os.path.join(dpdir,'treetodrslog')),daemon=True)
             treetodrsproc.start()
             timeoutsecs = 300 # seconds
             treetodrsproc.join(timeout=timeoutsecs) #
@@ -82,7 +82,10 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,worki
                 continue
             ud_drss = workingqueue.get_nowait()
             logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
-            clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
+            if storetypes:
+                clflines = clfutils.drses_to_clf([y for x,y,z in ud_drss])
+            else:
+                clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
             # add one always-there useless parse
             clflines = [postprocessing.postprocess_clf(x) for x in clflines] + [["b0 REF x1"]]
             fulldrsname = os.path.join(dpdir,'drsoutput.clf')
@@ -103,6 +106,12 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,worki
             logging.debug(f"Successfully performed DRS simplification for {dpname}.")
             outlistsimple.append((simplifiedpmbname,simplifieddrsname))
             outlistfull.append((fullpmbname,fulldrsname))
+            # If we want to store all the types of relations and such we should do so.
+            if storetypes:
+                typespathname = os.path.join(dpdir,"typesused.txt")
+                typeslists = [treetodrs.tracetosemtypes(x) for x in ud_drss]
+                with open(typespathname,'w',encoding='utf8') as f:
+                    nlines = f.write('\n\n'.join('\n'.join(' '.join(y) for y in x) for x in typeslists))
         except EmptyException:
             return
         except ConnectionError:
@@ -113,7 +122,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistsimple,outlistfull,worki
         except Exception as e:
             logging.exception(str(Exception))
 
-def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
+def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
@@ -131,7 +140,7 @@ def parsepmb(pmbdir, outdir, nproc=8, logfilepfx=None):
     dataoutputlistsimple = man.list()
     dataoutputlistfull = man.list()
     workingqueues = [man.Queue()  for i in range(nproc)]
-    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistsimple,dataoutputlistfull,workingqueues[i],(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None)), daemon=False) for i in range(nproc)]
+    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistsimple,dataoutputlistfull,workingqueues[i],storetypes,(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None)), daemon=False) for i in range(nproc)]
     logging.info(f"Successfully created the {nproc} parsing processes.")
     for proc in procs:
         proc.start()
@@ -152,9 +161,10 @@ if __name__ == "__main__":
     parser.add_argument("-s","--simpleoutfile",action="store",required=False,dest="simpleoutfile",help="the file to write simplified file pairs for evaluation")
     parser.add_argument("-f","--fulloutfile",action="store",required=False,dest="fulloutfile",help="the file to write full file pairs for evaluation")
     parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the parsing?")
+    parser.add_argument("-t","--storetypes",action="store_true",dest="storetypes",help="whether to store a special file saying what types were assigned to each word and relation in each DRS")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings will be added")
     args = parser.parse_args()
-    filepairssimple, filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),logfilepfx=args.logfilepfx)
+    filepairssimple, filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),storetypes=args.storetypes,logfilepfx=args.logfilepfx)
     if args.simpleoutfile is not None:
         with open(args.simpleoutfile,"w") as f:
             f.write('\n'.join(['\t'.join(x) for x in filepairssimple]))
