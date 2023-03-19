@@ -60,7 +60,7 @@ def add_nulldeterminers(sentence):
     sentence = conllu.TokenList(sorted(sentence,key=lambda x:x['id']))
     return reindex_tokenlist(sentence)
 
-# This takes a sentence and removes characters from the lemmas
+# This takes a sentence and removes characters from the lemmas and features
 # that will not play well with later derivation.
 # It is meant to undone by a step in postprocessing.
 def clean_lemmas(sentence):
@@ -70,6 +70,14 @@ def clean_lemmas(sentence):
         for sub in tokensubs:
             token['lemma'] = token['lemma'].replace(sub[0],sub[1])
         token['lemma'] = token['lemma'] + ("" if len(token['lemma'])>1 else "_LETTER")
+        if token['feats'] is not None:
+            keypairs = [[key,token['feats'][key]] for key in token['feats'].keys()]
+            for pair in keypairs:
+                for sub in tokensubs:
+                    pair[0] = pair[0].replace(sub[0],sub[1])
+                    pair[1] = pair[1].replace(sub[0],sub[1])
+            token['feats'] = dict(keypairs)
+                
     return conllu.TokenList(sentence)
 
 # Remove multi-token tokens

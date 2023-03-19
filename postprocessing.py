@@ -109,7 +109,7 @@ def guess_tenses(clflines):
                 extralines.append(f"{line[0]} Time {verbvar} {timevar}")
                 extralines.append(f'{line[0]} time "n.08" {timevar}')
                 extralines.append(f'{line[0]} TSU {timevar} "now"')
-            elif "VerbForm;Fin" in line[1]:
+            elif "VerbF_OR_m;Fin" in line[1]:
                 timevar = f"t{nextnumber}"
                 nextnumber = nextnumber + 1
                 extralines.append(f"{line[0]} Time {verbvar} {timevar}")
