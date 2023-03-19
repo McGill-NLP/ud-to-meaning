@@ -232,7 +232,7 @@ def simplifynodetyped(treenode, withtrace=False):
         for binarization in binarizations:
             nodeden = treenode.token['word_dens'][binarization[0][1]]
             if withtrace:
-                newnodedens = [(nodeden[0],nodeden[1],{'children':[],'original':nodeden,'form':treenode.token['form'],'deprel':treenode.token['deprel']})]
+                newnodedens = [(nodeden[0],nodeden[1],{'children':[],'original':nodeden,'form':treenode.token['form'],'deprel':treenode.token['deprel'],'upos':treenode.token['upos']})]
             else:
                 newnodedens = [(nodeden)]
             for term in binarization[1:-1]:
@@ -245,7 +245,7 @@ def simplifynodetyped(treenode, withtrace=False):
                     if withtrace:
                         newnodedens = [(childden[0],
                                         compute_conj(newnodeden[1],childden[1],childden[0]),
-                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel']}
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel'],'upos':newnodeden[2]['upos']}
                                         )
                                                             for childden in usefulchilddens
                                                             for newnodeden in newnodedens]
@@ -257,7 +257,7 @@ def simplifynodetyped(treenode, withtrace=False):
                     if withtrace:
                         newnodedens = [(childrelden[0].get_right().get_right(),
                                                         childrelden[1](newnodeden[1])(childden[1]).simplify(),
-                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel']}
+                                        {'children':newnodeden[2]['children'] + [(childrelden,childden)],'original':newnodeden[2]['original'],'form':newnodeden[2]['form'],'deprel':newnodeden[2]['deprel'],'upos':newnodeden[2]['upos']}
                                         )
                                                             for childden in usefulchilddens
                                                             for newnodeden in newnodedens]
@@ -336,3 +336,18 @@ def tracetogvtree(t, counter = 0, graph = None, parentname = None):
         return graph, counter
     else:
         return graph
+
+# Get a list of the semantic types assigned to each relation and word in computing a trace.
+def tracetosemtypes(trace):
+    if len(trace)==2:
+        return []
+    lines = []
+    POS = trace[2]['upos']
+    semtype = trace[2]['original'][0]
+    lines.append((f'POS:{POS}',f'{semtype}'))
+    for child in trace[2]['children']:
+        deprel = child[1][2]['deprel']
+        reltype = child[0][0]
+        lines.append((f'deprel:{deprel}',f'{reltype}'))
+        lines = lines + tracetosemtypes(child[1])
+    return lines
