@@ -11,6 +11,7 @@ from multiprocessing import Process, Manager, freeze_support
 from queue import Empty as EmptyException
 import logging
 import csv # writing output
+import os # manipulating paths
 
 # This simply helps to pass arguments to Counter, since Counter expects command line arguments.
 # Most of the code in this function is taken from the Counter code itself and is not mine.
@@ -89,7 +90,7 @@ def build_counter_args(f1, f2,
     return args
 
 # TODO might be more elegant to use Pools in the future.
-def evaluate_clf_proc(queue,list,logfilepfx=None):
+def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     while True:
@@ -103,6 +104,10 @@ def evaluate_clf_proc(queue,list,logfilepfx=None):
             try:
                 ans = counter.main(myargs)
                 scores = [(counter.compute_f(items[0], items[1], items[2], myargs.significant, False),items[-1]) for items in ans]
+                if scorelistfile:
+                    scorelist = [str(x[0][2]) for x in scores]
+                    with open(os.path.join(os.path.dirname(datapoint[1]),scorelistfile), 'w') as f:
+                        f.write('\n'.join(scorelist))
             except ValueError:
                 logging.warning(f"Did not find output for datapoint {datapoint[0]}, using NA.")
                 scores = [(('NA','NA','NA'),'NA')]
@@ -113,7 +118,7 @@ def evaluate_clf_proc(queue,list,logfilepfx=None):
             return
 
 # Just pass it the input and output files to test, it will return all the results.
-def evaluate_clfs(filepairs, nproc=8, logfilepfx = None):
+def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG,force=True)
     man = Manager()
@@ -121,7 +126,7 @@ def evaluate_clfs(filepairs, nproc=8, logfilepfx = None):
     for datapoint in filepairs:
         datainputqueue.put(datapoint)
     dataoutputlist = man.list()
-    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,f"{logfilepfx}-proc{i}")) for i in range(nproc)]
+    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,scorelistfile,f"{logfilepfx}-proc{i}")) for i in range(nproc)]
     logging.info(f"Successfully made the {nproc} evaluation processes.")
     text_trap = io.StringIO()
     sys.stdout = text_trap
@@ -144,11 +149,12 @@ if __name__ == "__main__":
     parser.add_argument("-o","--outfile",action="store",required=True,dest="outfile",help="the file to write output to in tsv format")
     parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the evaluation?")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings may be added")
+    parser.add_argument("-s","--scorelistfile",action="store",dest="scorelistfile",help="the file to write a list of F scores for every DRS in the folder where the computed DRS are")
     args = parser.parse_args()
     with open(args.infile) as f:
         infileraw = f.read()
     filepairs = [x.split('\t') for x in infileraw.split('\n')]
-    ans = evaluate_clfs(filepairs,nproc=args.nproc,logfilepfx=args.logfilepfx)
+    ans = evaluate_clfs(filepairs,nproc=args.nproc,scorelistfile=args.scorelistfile,logfilepfx=args.logfilepfx)
     with open(args.outfile, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore','LongResults'])
         nlines = writer.writeheader()
