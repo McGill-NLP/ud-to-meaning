@@ -15,6 +15,7 @@ not	_NOT_
 and	_AND_
 &	_AMPERSAND_
 ^	_CARET_
+~	_TILDE_
 or	_OR_
 |	_PIPE_
 implies	_IMPLIES_
