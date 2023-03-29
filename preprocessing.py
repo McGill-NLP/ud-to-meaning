@@ -101,7 +101,7 @@ def preprocess(sentence):
                                 sentence
                             )
                         ),
-                    'flat'
+                    'flat', "~"
                     ),
                 'compound'
                 ),
