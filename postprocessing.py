@@ -61,7 +61,7 @@ def guess_missing_relations(clflines):
             line[1] = 'Theme'
         elif line[1]=='ARG2_AUX':
             line[1] = 'Co-Theme'
-        elif line[1]=='ARG3':
+        elif line[1]=='ARG3' or line[1]=='ARG3_VERB':
             line[1] = 'Recipient'
         elif line[1]=='ADJ_RELATION':
             line[1] = 'Attribute'
