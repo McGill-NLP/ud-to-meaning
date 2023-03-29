@@ -87,18 +87,18 @@ def reindex_tokenlist(sentence):
 # The result is that we essentially treat that relation as being between two parts of the same word,
 # and combine the parts of that word,
 # with POS and syntactic role corresponding to the relation's head.
-def flatten_relation_tree(treenode,relation):
+def flatten_relation_tree(treenode,relation,sep="_"):
     treenode = copy.deepcopy(treenode)
     childrentokeep = []
     for child in treenode.children:
         if child.token['deprel'] == relation:
             child = concat_with_all_dependents(child)
             if child.token['id'] < treenode.token['id']:
-                treenode.token['form'] = child.token['form'] + '_' + treenode.token['form']
-                treenode.token['lemma'] = child.token['lemma'] + '_' + treenode.token['lemma']
+                treenode.token['form'] = child.token['form'] + sep + treenode.token['form']
+                treenode.token['lemma'] = child.token['lemma'] + sep + treenode.token['lemma']
             else:
-                treenode.token['form'] = treenode.token['form'] + '_' + child.token['form']
-                treenode.token['lemma'] = treenode.token['lemma'] + '_' + child.token['lemma']
+                treenode.token['form'] = treenode.token['form'] + sep + child.token['form']
+                treenode.token['lemma'] = treenode.token['lemma'] + sep + child.token['lemma']
         else:
             child = flatten_relation_tree(child, relation)
             childrentokeep.append(child)
@@ -108,10 +108,10 @@ def flatten_relation_tree(treenode,relation):
 # This function takes a TokenList as input
 # and performs the same operation as flatten_relation_tree on it,
 # returning the resulting TokenList with new indices.
-def flatten_relation_list(sentence,relation):
+def flatten_relation_list(sentence,relation,sep="_"):
     return conllu.TokenList(reindex_tokenlist(
                 tree_to_tokenlist(
                     flatten_relation_tree(
-                        sentence.to_tree(), relation
+                        sentence.to_tree(), relation, sep
                     ))))
 
