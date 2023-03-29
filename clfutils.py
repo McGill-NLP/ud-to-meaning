@@ -250,3 +250,90 @@ def remove_conds_with_var(conds,var):
             newconds.append(cond)
     return newconds
 
+# Converting CLF format to Simplified Box Notation.
+def clf_to_sbn(clflines):
+    clflinesstripped = [x.split("%")[0].strip() for x in clflines]
+    contentlines = [x for x in clflinesstripped if len(x) > 0]
+    clflinessplit = [x.split() for x in contentlines]
+    # First remove presuppositions, because these are ignored somehow
+    for line in clflinessplit:
+        if line[1] == "PRESUPPOSITION":
+            newlabel = line[0]
+            oldlabel = line[2]
+            if newlabel != oldlabel:
+                for line2 in clflinessplit:
+                    for i in range(len(line2)):
+                        if line2[i] == oldlabel:
+                            line2[i] = newlabel
+    clflinessplit = [x for x in clflinessplit if x[1] != "PRESUPPOSITION"]
+    # now combine synsets with their labels
+    for i in range(len(clflinessplit)):
+        x = clflinessplit[i]
+        if len(x)>2:
+            term = x[2]
+            if term.startswith('"') and term.endswith('"') and len(term) > 2 and term[1].isalpha() and term[2] == '.' and term[3:-1].isdigit():
+                clflinessplit[i] = [x[0]] + [x[1]+"."+term[1:-1]] + x[3:]
+    sbnlines = []
+    clflinessplit = sorted(clflinessplit,key=lambda x:x[0])
+    boxes = sorted(list(set([x[0] for x in clflinessplit])))
+    variables = []
+    for x in (x[2] for x in clflinessplit if x[2] not in boxes):
+        if x not in variables:
+            variables.append(x)
+    # treat each box separately
+    for i in range(len(boxes)):
+        # if it's subordinate to another box, start with that
+        boxintroductions = [x for x in clflinessplit if len(x)>2 and x[2] == boxes[i]]
+        if boxintroductions:
+            introline = boxintroductions[0]
+            relativeindex = boxes.index(introline[0]) - i
+            if relativeindex<0:
+                symbol="<"
+                relativeindex = -relativeindex
+            else:
+                symbol=">"
+            sbnlines.append(f"          {introline[1]} {symbol}{relativeindex}")
+        boxlines = [x for x in clflinessplit if x[0]==boxes[i]]
+        #if not boxintroductions:
+        #    for line in boxlines:
+        #        if len(line)>=4 and line[2] in variables and line[3] in boxes:
+        #                relativeindex = boxes.index(line[3]) - i
+        #                if relativeindex<0:
+        #                    symbol="<"
+        #                    relativeindex = -relativeindex
+        #                else:
+        #                    symbol=">"
+        #                sbnlines.append(f"          SOURCE {symbol}{relativeindex}")
+        boxvars = [x[2] for x in boxlines if len(x) > 1 and x[1] == "REF"]
+        # then all of its variables and their facts
+        for var in boxvars:
+            varline = ""
+            facts = [x for x in boxlines if len(x) >2 and x[2]==var]
+            for fact in facts:
+                if len(fact) == 3 and fact[1] != "REF":
+                    varline = varline = fact[1]
+                    break
+            if not varline:
+                varline = "entity.n.01"
+            for fact in facts:
+                if len(fact) == 4:
+                    relname = fact[1]
+                    if fact[3] in variables:
+                        relativeindex = variables.index(fact[3]) - variables.index(var)
+                        if relativeindex>0:
+                            symbol="+"
+                        else:
+                            symbol=""
+                        varline = varline + f" {relname} {symbol}{relativeindex}"
+                    elif fact[3] in boxes:
+                        relativeindex = boxes.index(fact[3]) - i
+                        if relativeindex<0:
+                            symbol="<"
+                            relativeindex = -relativeindex
+                        else:
+                            symbol=">"
+                        varline = varline + f" {relname} {symbol}{relativeindex}"
+                    else:
+                        varline = varline + f" {relname} {fact[3]}"
+            sbnlines.append(varline)
+    return sbnlines
