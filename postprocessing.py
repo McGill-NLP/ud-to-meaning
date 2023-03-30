@@ -23,7 +23,7 @@ def unclean_lemmas(clflines):
 
 # Guesses wordnet synsets for tenses coming from lemmas
 # Currently just guesses "01" for all of them, as Poelman mentions would be reasonable.
-def guess_wordnet_synsets(clflines):
+def guess_wordnet_synsets(clflines,synsetdict={}):
     clflinessplit = [[x.split()[0],x.split()[1],' '.join(x.split()[2:])] for x in clflines if len(x.split())>1]
     for line in clflinessplit:
         if line[1].startswith("FINDWORDNET"):
@@ -39,7 +39,14 @@ def guess_wordnet_synsets(clflines):
                 POSshort='r'
             if POS=='ADJ':
                 POSshort='a'
-            line[1]= f'{lemma} "{POSshort}.01"'
+            if lemma+"."+POSshort in synsetdict:
+                synset = synsetdict[lemma+"."+POSshort]
+                line[1] = f'{".".join(synset.split(".")[:-2])} "{".".join(synset.split(".")[-2:])}"'
+            elif lemma in synsetdict:
+                synset = synsetdict[lemma]
+                line[1] = f'{".".join(synset.split(".")[:-2])} "{".".join(synset.split(".")[-2:])}"'
+            else:
+                line[1]= f'{lemma} "{POSshort}.01"'
     return [' '.join(x) for x in clflinessplit]
 
 # Guesses relation labels for verbs, adjectives, and possessors, tense based on most frequent class
@@ -65,7 +72,7 @@ def guess_missing_relations(clflines):
             line[1] = 'Recipient'
         elif line[1]=='ADJ_RELATION':
             line[1] = 'Attribute'
-        elif line[1]=='ADP_RELATION':
+        elif line[1].startswith('ADP_RELATION'):
             line[1] = 'Location'
         elif line[1]=='ADV_RELATION':
             line[1] = 'Manner'
@@ -161,13 +168,13 @@ def guess_propn_type(clflines):
     return [' '.join(x) for x in clflinessplit] + extralines
 
 
-def postprocess_clf(clflines):
+def postprocess_clf(clflines,synsetdict={}):
     return guess_wordnet_synsets(
             guess_missing_relations(
             guess_tenses(
             guess_propn_type(
-            unclean_lemmas(clflines)))))
+            unclean_lemmas(clflines)))),synsetdict)
 
 # DRS version of the previous; currently a bit of a cheater.
-def postprocess_drs(drs):
-    return clfutils.clf_to_drs(postprocess_clf(clfutils.drs_to_clf(drs)))
+def postprocess_drs(drs,synsetdict={}):
+    return clfutils.clf_to_drs(postprocess_clf(clfutils.drs_to_clf(drs),synsetdict))

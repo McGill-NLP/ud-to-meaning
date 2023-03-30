@@ -4,6 +4,7 @@ import logging
 from multiprocessing import Process, Manager, freeze_support # To allow things to sometimes time out.
 from queue import Empty as EmptyException
 import argparse # command line arguments
+import json # reading in dictionaries
 #os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 import conlluutils
 import preprocessing
@@ -26,7 +27,7 @@ def getalldens_proc_wrapper(tree, queue, withtrace=False, logfilepfx=None):
         logging.exception(str(e))
     return
 
-def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storetypes=False,logfilepfx=None):
+def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storetypes=False,logfilepfx=None,boxermappingpath=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     stanzanlp = {}
@@ -87,7 +88,25 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
             else:
                 clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
             # add one always-there useless parse
-            clflines = [postprocessing.postprocess_clf(x) for x in clflines] + [["b0 REF x1"]]
+            boxermappingdict = {}
+            if boxermappingpath:
+                boxerdictposfile = os.path.join(boxermappingpath,rightlang+"_lemma_pos_sense_lookup_gold.json")
+                boxerdictsensefile = os.path.join(boxermappingpath,rightlang+"_lemma_sense_lookup_gold.json")
+                if os.path.exists(boxerdictposfile):
+                    with open(boxerdictposfile) as f:
+                        boxerdictpos = json.load(f)
+                    boxerdictpos = dict((k.lower(), v.lower()) for k,v in boxerdictpos.items())
+                else:
+                    boxerdictpos = {}
+                if os.path.exists(boxerdictsensefile):
+                    with open(boxerdictsensefile) as f:
+                        boxerdictsense = json.load(f)
+                    boxerdictsense = dict((k.lower(), v.lower()) for k,v in boxerdictsense.items())
+                else:
+                    boxerdictsense = {}
+                boxermappingdict.update(boxerdictsense)
+                boxermappingdict.update(boxerdictpos)
+            clflines = [postprocessing.postprocess_clf(x,boxermappingdict) for x in clflines] + [["b0 REF x1"]]
             fulldrsname = os.path.join(dpdir,'drsoutput.clf')
             with open(fulldrsname, 'w',encoding='utf8') as f:
                 nlines = f.write('\n\n'.join(['\n'.join(x) for x in clflines]))
@@ -110,7 +129,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
         except Exception as e:
             logging.exception(str(Exception))
 
-def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None):
+def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None,boxermappingpath=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
@@ -127,7 +146,7 @@ def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None):
         datainputqueue.put(datapoint)
     dataoutputlistfull = man.list()
     workingqueues = [man.Queue()  for i in range(nproc)]
-    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistfull,workingqueues[i],storetypes,(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None)), daemon=False) for i in range(nproc)]
+    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistfull,workingqueues[i],storetypes,(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None),boxermappingpath), daemon=False) for i in range(nproc)]
     logging.info(f"Successfully created the {nproc} parsing processes.")
     for proc in procs:
         proc.start()
@@ -149,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the parsing?")
     parser.add_argument("-t","--storetypes",action="store_true",dest="storetypes",help="whether to store a special file saying what types were assigned to each word and relation in each DRS")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings will be added")
+    parser.add_argument("-b","--boxermappingpath",action="store",dest="boxermappingpath",help="optional path to a folder to take Boxer synset mappings from")
     args = parser.parse_args()
     filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),storetypes=args.storetypes,logfilepfx=args.logfilepfx)
     if args.fulloutfile is not None:
