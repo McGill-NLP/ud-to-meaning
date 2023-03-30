@@ -65,6 +65,8 @@ def guess_missing_relations(clflines):
             line[1] = 'Recipient'
         elif line[1]=='ADJ_RELATION':
             line[1] = 'Attribute'
+        elif line[1]=='ADP_RELATION':
+            line[1] = 'Location'
         elif line[1]=='ADV_RELATION':
             line[1] = 'Manner'
         elif line[1]=='ARG2_ADJ':
