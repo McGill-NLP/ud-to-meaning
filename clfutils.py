@@ -169,7 +169,7 @@ def remove_boxrels(clflines):
     for x,_ in clflinestokens:
         if len(x) > 0 and re.match(r'^b\d*$',x[0]):
             x[0] = 'b0'
-    return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
+    return(['%'.join([' '.join(line[0])+(' ' if line[1] else '')] + line[1]) for line in clflinestokens])
 
 def remove_thetaroles(clflines):
     clflinespctsplit = [x.split("%") for x in clflines]
@@ -177,7 +177,7 @@ def remove_thetaroles(clflines):
     for x,_ in clflinestokens:
         if len(x) > 1 and x[1] in pmbverbnetroles:
             x[1] = "Arg"
-    return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
+    return(['%'.join([' '.join(line[0])+(' ' if line[1] else '')] + line[1]) for line in clflinestokens])
 
 def remove_synsets(clflines):
     clflinespctsplit = [x.split("%") for x in clflines]
@@ -185,7 +185,7 @@ def remove_synsets(clflines):
     for x,_ in clflinestokens:
         if len(x) > 2 and re.match(r'^"[a-z]\.\d\d"$',x[2]):
             x[2] = '"n.01"'
-    return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
+    return(['%'.join([' '.join(line[0])+(' ' if line[1] else '')] + line[1]) for line in clflinestokens])
 
 # This takes list of the lines from a clause format CLF file (the type available in PMB data)
 # and outputs a DRS of the class from the DRT module.
