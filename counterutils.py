@@ -12,6 +12,7 @@ from queue import Empty as EmptyException
 import logging
 import csv # writing output
 import os # manipulating paths
+import clfutils
 
 # This simply helps to pass arguments to Counter, since Counter expects command line arguments.
 # Most of the code in this function is taken from the Counter code itself and is not mine.
@@ -117,13 +118,49 @@ def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None):
         except EmptyException:
             return
 
+def simplify_filepairs(filepairs,synset=False,box=False,theta=False):
+    if not (synset or box or theta):
+        return []
+    else:
+        outpairs = []
+        for pair in filepairs:
+            pathprefix = pair[1][:-4]
+            with open(pair[0]) as f:
+                pmbclf = f.read().split("\n")
+            with open(pair[1]) as f:
+                computedclf = f.read().split("\n")
+            if synset:
+                pmbclf = clfutils.remove_synsets(pmbclf)
+                computedclf = clfutils.remove_synsets(computedclf)
+            if box:
+                pmbclf = clfutils.remove_boxrels(pmbclf)
+                computedclf = clfutils.remove_boxrels(computedclf)
+            if theta:
+                pmbclf = clfutils.remove_thetaroles(pmbclf)
+                computedclf = clfutils.remove_thetaroles(computedclf)
+            with open(pathprefix+"-pmb-simplified.clf","w") as f:
+                nlines = f.write("\n".join(pmbclf))
+            with open(pathprefix+"-simplified.clf","w") as f:
+                nlines = f.write("\n".join(computedclf))
+            outpairs.append([pathprefix+"-pmb-simplified.clf",pathprefix+"-simplified.clf","w"])
+        return outpairs
+
 # Just pass it the input and output files to test, it will return all the results.
-def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None):
+def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None,remove=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG,force=True)
+    if not remove:
+        targetfilepairs = filepairs
+    else:
+        simplefilepairs = simplify_filepairs(filepairs,synset = ("synset" in remove), box = ("box" in remove),theta=("theta" in remove))
+        logging.info("Successfully created simplified versions of files.")
+        if simplefilepairs:
+            targetfilepairs = simplefilepairs
+        else:
+            targetfilepairs = filepairs
     man = Manager()
     datainputqueue = man.Queue()
-    for datapoint in filepairs:
+    for datapoint in targetfilepairs:
         datainputqueue.put(datapoint)
     dataoutputlist = man.list()
     procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,scorelistfile,f"{logfilepfx}-proc{i}")) for i in range(nproc)]
@@ -140,6 +177,12 @@ def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None):
     sys.stdout = sys.__stdout__
     if logfilepfx is not None:
         logging.basicConfig(force=True)
+    if simplefilepairs:
+        for pair in simplefilepairs:
+            if os.path.exists(pair[0]):
+                    os.remove(pair[0])
+            if os.path.exists(pair[1]):
+                    os.remove(pair[1])
     return list(dataoutputlist)
 
 if __name__ == "__main__":
@@ -150,11 +193,12 @@ if __name__ == "__main__":
     parser.add_argument("-n","--nproc",action="store",default=8,dest="nproc",type=int, help="how many processes to use when running the evaluation?")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings may be added")
     parser.add_argument("-s","--scorelistfile",action="store",dest="scorelistfile",help="the file to write a list of F scores for every DRS in the folder where the computed DRS are")
+    parser.add_argument("-r","--remove",action="store",dest="remove",type=str,help="What information to remove? Should be a string containing zero or more of the words synset, box, and theta.")
     args = parser.parse_args()
     with open(args.infile) as f:
         infileraw = f.read()
     filepairs = [x.split('\t') for x in infileraw.split('\n')]
-    ans = evaluate_clfs(filepairs,nproc=args.nproc,scorelistfile=args.scorelistfile,logfilepfx=args.logfilepfx)
+    ans = evaluate_clfs(filepairs,nproc=args.nproc,scorelistfile=args.scorelistfile,logfilepfx=args.logfilepfx,remove=args.remove)
     with open(args.outfile, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore','LongResults'])
         nlines = writer.writeheader()
