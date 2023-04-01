@@ -37,7 +37,7 @@ def pmbdemo(pmbpath, partnum, docnum, simplified=False, returnall = False, witht
         pmbclfraw = f.read()
         pmbclflines = pmbclfraw.split('\n')
     if simplified:
-        pmbclflines = clfutils.simplify_clf(pmbclflines)
+        pmbclflines = clfutils.remove_boxrels(pmbclflines)
     pmb_drs = clfutils.clf_to_drs(pmbclflines)
     # Read the raw PMB file,
     with open(os.path.join(pmbpath,str(partnum),str(docnum), r"en.raw")) as f:
@@ -54,23 +54,23 @@ def pmbdemo(pmbpath, partnum, docnum, simplified=False, returnall = False, witht
     if returnall:
         if withtrace:
             if simplified:
-                return ud_parse, preprocessed, [(clfutils.simplify_drs(ud_drs[1]),ud_drs) for ud_drs in ud_drss], pmb_drs
+                return ud_parse, preprocessed, [(clfutils.remove_boxrels_drs(ud_drs[1]),ud_drs) for ud_drs in ud_drss], pmb_drs
             else:
-                return ud_parse, preprocessed, [(clfutils.simplify_drs(ud_drs[1]),ud_drs) for ud_drs in ud_drss], pmb_drs
+                return ud_parse, preprocessed, [(clfutils.remove_boxrels_drs(ud_drs[1]),ud_drs) for ud_drs in ud_drss], pmb_drs
         else:
             if simplified:
-                return ud_parse, preprocessed, [clfutils.simplify_drs(ud_drs[1]) for ud_drs in ud_drss], pmb_drs
+                return ud_parse, preprocessed, [clfutils.remove_boxrels_drs(ud_drs[1]) for ud_drs in ud_drss], pmb_drs
             else:
-                return ud_parse, preprocessed, [clfutils.simplify_drs(ud_drs[1]) for ud_drs in ud_drss], pmb_drs
+                return ud_parse, preprocessed, [clfutils.remove_boxrels_drs(ud_drs[1]) for ud_drs in ud_drss], pmb_drs
     if ud_drss:
         if withtrace:
             if simplified:
-                return ud_parse, preprocessed, (clfutils.simplify_drs(ud_drss[0][1]),ud_drss[0]), pmb_drs
+                return ud_parse, preprocessed, (clfutils.remove_boxrels_drs(ud_drss[0][1]),ud_drss[0]), pmb_drs
             else:
                 return ud_parse, preprocessed, (ud_drss[0][1],ud_drss[0]), pmb_drs
         else:
             if simplified:
-                return ud_parse, preprocessed, clfutils.simplify_drs(ud_drss[0][1]), pmb_drs
+                return ud_parse, preprocessed, clfutils.remove_boxrels_drs(ud_drss[0][1]), pmb_drs
             else:
                 return ud_parse, preprocessed, ud_drss[0][1], pmb_drs
     else:

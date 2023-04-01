@@ -2,7 +2,12 @@ from nltk.sem.drt import *
 from sdrt import *
 import re # helps in simplify_clf
 
-argrelations = ("Agent","Theme","Patient","Topic","Recipient","Experiencer","Co_Theme","Co_Agent","Co-Theme","Co-Agent","Stimulus", "Creator", "User", "Of")
+pmbverbnetroles = ("Agent","Asset","Attribute","Beneficiary","Causer","Co-Agent","Co-Patient","Co-Theme","Destination",
+                   "Duration","Experiencer","Finish","Frequency","Goal","Instrument","Location","Manner","Material",
+                   "Path","Patient","Pivot","Product","Recipient","Result","Source","Start","Stimulus","Theme","Time",
+                   "Topic","Value","Colour","Creator","MadeOf","Name","Of","Owner","PartOf","Quantity","Role","Title",
+                   "Unit","User","ClockTime","DayOfMonth","DayOfWeek","Decade","MonthOfYear","YearOfCentury")
+
 
 # Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
 # It takes as input a condition from the DRT module, the name of the projective DRS it belongs to,
@@ -155,7 +160,7 @@ def sbn_to_clf(sbnlines):
     except Exception as e:
         return []
 
-def simplify_clf(clflines):
+def remove_boxrels(clflines):
     clflinespctsplit = [x.split("%") for x in clflines]
     clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
     # Remove box-level relations.
@@ -166,6 +171,21 @@ def simplify_clf(clflines):
             x[0] = 'b0'
     return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
 
+def remove_thetaroles(clflines):
+    clflinespctsplit = [x.split("%") for x in clflines]
+    clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
+    for x,_ in clflinestokens:
+        if len(x) > 1 and x[1] in pmbverbnetroles:
+            x[1] = "Arg"
+    return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
+
+def remove_synsets(clflines):
+    clflinespctsplit = [x.split("%") for x in clflines]
+    clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
+    for x,_ in clflinestokens:
+        if len(x) > 2 and re.match(r'^"[a-z]\.\d\d"$',x[2]):
+            x[2] = '"n.01"'
+    return(['%'.join([' '.join(line[0])+' '] + line[1]) for line in clflinestokens])
 
 # This takes list of the lines from a clause format CLF file (the type available in PMB data)
 # and outputs a DRS of the class from the DRT module.
@@ -234,9 +254,6 @@ def clf_to_drs(clflines):
     for pointer in pointedboxes.keys():
         finaldrs = finaldrs + pointedboxes[pointer]
     return DrtExpression.fromstring(str(finaldrs.simplify()))
-
-def simplify_drs(drs):
-    return drs
 
 # Recursively removes any conditions that have a particular variable in them.
 def remove_conds_with_var(conds,var):
