@@ -2,11 +2,12 @@ from nltk.sem.drt import *
 from sdrt import *
 import re # helps in simplify_clf
 
-pmbverbnetroles = ("Agent","Asset","Attribute","Beneficiary","Causer","Co-Agent","Co-Patient","Co-Theme","Destination",
+pmbverbnetroles = ["Agent","Asset","Attribute","Beneficiary","Causer","Co-Agent","Co-Patient","Co-Theme","Destination",
                    "Duration","Experiencer","Finish","Frequency","Goal","Instrument","Location","Manner","Material",
                    "Path","Patient","Pivot","Product","Recipient","Result","Source","Start","Stimulus","Theme","Time",
                    "Topic","Value","Colour","Creator","MadeOf","Name","Of","Owner","PartOf","Quantity","Role","Title",
-                   "Unit","User","ClockTime","DayOfMonth","DayOfWeek","Decade","MonthOfYear","YearOfCentury")
+                   "Unit","User","ClockTime","DayOfMonth","DayOfWeek","Decade","MonthOfYear","YearOfCentury"]
+pmbverbnetroles = pmbverbnetroles + [x+"Of" for x in pmbverbnetroles]
 
 
 # Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
