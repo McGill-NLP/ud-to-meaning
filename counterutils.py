@@ -91,7 +91,7 @@ def build_counter_args(f1, f2,
     return args
 
 # TODO might be more elegant to use Pools in the future.
-def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None):
+def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None,default_sense=False,default_role=False):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     while True:
@@ -101,7 +101,9 @@ def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None):
             myargs = build_counter_args(datapoint[0],
                                         datapoint[1],
                                         ill='score',
-                                        baseline=True)
+                                        baseline=True,
+                                        default_sense=default_sense,
+                                        default_role=default_role)
             try:
                 ans = counter.main(myargs)
                 scores = [(counter.compute_f(items[0], items[1], items[2], myargs.significant, False),items[-1]) for items in ans]
@@ -152,7 +154,7 @@ def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None,remo
     if not remove:
         targetfilepairs = filepairs
     else:
-        simplefilepairs = simplify_filepairs(filepairs,synset = ("synset" in remove), box = ("box" in remove),theta=("theta" in remove))
+        simplefilepairs = simplify_filepairs(filepairs,synset = False, box = ("box" in remove),theta=False)
         logging.info("Successfully created simplified versions of files.")
         if simplefilepairs:
             targetfilepairs = simplefilepairs
@@ -163,7 +165,9 @@ def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None,remo
     for datapoint in targetfilepairs:
         datainputqueue.put(datapoint)
     dataoutputlist = man.list()
-    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,scorelistfile,f"{logfilepfx}-proc{i}")) for i in range(nproc)]
+    default_sense = remove and "synset" in remove
+    default_role = remove and "theta" in remove
+    procs = [Process(target=evaluate_clf_proc, args=(datainputqueue,dataoutputlist,scorelistfile,f"{logfilepfx}-proc{i}",default_sense, default_role)) for i in range(nproc)]
     logging.info(f"Successfully made the {nproc} evaluation processes.")
     text_trap = io.StringIO()
     sys.stdout = text_trap
