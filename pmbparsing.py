@@ -27,7 +27,7 @@ def getalldens_proc_wrapper(tree, queue, withtrace=False, logfilepfx=None):
         logging.exception(str(e))
     return
 
-def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storetypes=False,logfilepfx=None,boxermappingpath=None):
+def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storetypes=False,logfilepfx=None,boxermappingpath=None,maxoutputs=100000):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
     stanzanlp = {}
@@ -82,12 +82,12 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
                 logging.warning(f"Parsing datapoint:{dpname} took too long (over {timeoutsecs} seconds).")
                 continue
             ud_drss = workingqueue.get_nowait()
-            logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}.")
+            logging.debug(f"Found {len(ud_drss)} DRS parses for {dpname}. Writing the first {maxoutputs}.")
             if storetypes:
                 clflines = clfutils.drses_to_clf([y for x,y,z in ud_drss])
             else:
                 clflines = clfutils.drses_to_clf([y for x,y in ud_drss])
-            # add one always-there useless parse
+            clflines = clflines[:maxoutputs]
             boxermappingdict = {}
             if boxermappingpath:
                 boxerdictposfile = os.path.join(boxermappingpath,rightlang+"_lemma_pos_sense_lookup_gold.json")
@@ -106,6 +106,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
                     boxerdictsense = {}
                 boxermappingdict.update(boxerdictsense)
                 boxermappingdict.update(boxerdictpos)
+            # add one always-there useless parse
             clflines = [postprocessing.postprocess_clf(x,boxermappingdict) for x in clflines] + [["b0 REF x1"]]
             fulldrsname = os.path.join(dpdir,'drsoutput.clf')
             with open(fulldrsname, 'w',encoding='utf8') as f:
@@ -129,7 +130,7 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
         except Exception as e:
             logging.exception(str(Exception))
 
-def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None,boxermappingpath=None):
+def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None,boxermappingpath=None,maxoutputs=100000):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
@@ -146,7 +147,7 @@ def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None,boxermap
         datainputqueue.put(datapoint)
     dataoutputlistfull = man.list()
     workingqueues = [man.Queue()  for i in range(nproc)]
-    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistfull,workingqueues[i],storetypes,(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None),boxermappingpath), daemon=False) for i in range(nproc)]
+    procs = [Process(target=parsepmb_proc, args=(datapointpathdict,outdir,datainputqueue,dataoutputlistfull,workingqueues[i],storetypes,(f"{logfilepfx}-proc{i}" if logfilepfx is not None else None),boxermappingpath,maxoutputs), daemon=False) for i in range(nproc)]
     logging.info(f"Successfully created the {nproc} parsing processes.")
     for proc in procs:
         proc.start()
@@ -169,8 +170,9 @@ if __name__ == "__main__":
     parser.add_argument("-t","--storetypes",action="store_true",dest="storetypes",help="whether to store a special file saying what types were assigned to each word and relation in each DRS")
     parser.add_argument("-l","--logfilepfx",action="store",dest="logfilepfx",help="where to write the log? just the prefix as different endings will be added")
     parser.add_argument("-b","--boxermappingpath",action="store",dest="boxermappingpath",help="optional path to a folder to take Boxer synset mappings from")
+    parser.add_argument("-m","--maxoutputs",action="store",default=100000,type=int,dest="maxoutputs",help="Maximum outputs allowed for a single datapoint; by default 100000")
     args = parser.parse_args()
-    filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),storetypes=args.storetypes,logfilepfx=args.logfilepfx)
+    filepairsfull = parsepmb(args.pmbdir,args.outdir,nproc=int(args.nproc),storetypes=args.storetypes,logfilepfx=args.logfilepfx,maxoutputs=int(args.maxoutputs))
     if args.fulloutfile is not None:
         with open(args.fulloutfile,"w") as f:
             f.write('\n'.join(['\t'.join(x) for x in filepairsfull]))
