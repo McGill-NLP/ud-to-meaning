@@ -23,8 +23,12 @@ def getalldens_proc_wrapper(tree, queue, withtrace=False, logfilepfx=None):
     try:
         dens = treetodrs.getalldens(tree,withtrace)
         queue.put(dens)
+    except ConnectionRefusedError:
+        logging.exception("unable to append datapoint's dens to queue.")
+        queue.put([])
     except Exception as e:
         logging.exception(str(e))
+        queue.put([])
     return
 
 def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storetypes=False,logfilepfx=None,boxermappingpath=None,maxoutputs=100000):
@@ -56,6 +60,12 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
             dpdir = os.path.join(outdir,dpname.replace('\\','-').replace('/','-').replace('.',''))
             if not os.path.exists(dpdir):
                 os.mkdir(dpdir)
+            fulldrsname = os.path.join(dpdir,'drsoutput.clf')
+            fullpmbname = datapointpathdict[dpname]['drs']
+            if os.path.exists(fulldrsname):
+                logging.debug(f"Already found output for {dpname}.")
+                outlistfull.append((fullpmbname,fulldrsname))
+                continue
             # read the raw file
             with open(datapointpathdict[dpname]['raw']) as f:
                 textraw = f.read()
@@ -134,10 +144,10 @@ def parsepmb(pmbdir, outdir, nproc=8, storetypes=False, logfilepfx=None,boxermap
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+"-main.log", encoding='utf-8', level=logging.DEBUG,force=True)
     pmbfiles = []
-    for path, _, files in tqdm(os.walk(pmbdir)):
+    for path, _, files in tqdm(os.walk(pmbdir),desc="finding files:"):
         pmbfiles = pmbfiles + [os.path.join(path,x) for x in files]
     datapointprefixes = [".".join(x.split(".")[:-2]) for x in pmbfiles]
-    datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off','raw':x+'.raw'}) for x in datapointprefixes if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles and x+'.raw' in pmbfiles)
+    datapointpathdict = dict((x,{'drs':x+'.drs.clf','tokens':x+'.tok.off','raw':x+'.raw'}) for x in tqdm(datapointprefixes,desc="getting paths to clf and raw") if x+'.drs.clf' in pmbfiles and x+'.tok.off' in pmbfiles and x+'.raw' in pmbfiles)
     logging.info(f"Found {len(datapointpathdict)} files to process.")
     if not os.path.exists(outdir):
         os.mkdir(outdir)
