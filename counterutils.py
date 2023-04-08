@@ -153,6 +153,7 @@ def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None,remo
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG,force=True)
     if not remove:
         targetfilepairs = filepairs
+        simplefilepairs = []
     else:
         simplefilepairs = simplify_filepairs(filepairs,synset = False, box = ("box" in remove),theta=False)
         logging.info("Successfully created simplified versions of files.")
