@@ -83,6 +83,9 @@ def parsepmb_proc(datapointpathdict,outdir,queue,outlistfull,workingqueue,storet
             logging.debug(f"Successfully performed UD preprocessing for {dpname}.")
             # DRSs to an output file
             #ud_drss = treetodrs.getalldens(preprocessed)
+            # empty the working queue before starting. this is important!
+            while not workingqueue.empty():
+                dump = workingqueue.get_nowait()
             treetodrsproc = Process(target=getalldens_proc_wrapper,args=(preprocessed,workingqueue,storetypes,os.path.join(dpdir,'treetodrslog')),daemon=True)
             treetodrsproc.start()
             timeoutsecs = 300 # seconds
