@@ -19,7 +19,7 @@ def process_cond(cond, mydrsname, counter):
         rel = cond.relation
         embdrs = cond.drs
         embname = 'b'+str(counter)
-        newline = f'{mydrsname} {rel} {embname}'
+        newline = f'{embname} {rel} {mydrsname}'
         newlines, counter = drs_to_clf(embdrs,counter)
         return [newline] + newlines, counter
     elif isinstance(cond,DrtApplicationExpression):
