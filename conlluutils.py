@@ -100,7 +100,7 @@ def flatten_relation_tree(treenode,relation,sep="_"):
                 treenode.token['form'] = treenode.token['form'] + sep + child.token['form']
                 treenode.token['lemma'] = treenode.token['lemma'] + sep + child.token['lemma']
         else:
-            child = flatten_relation_tree(child, relation)
+            child = flatten_relation_tree(child, relation, sep)
             childrentokeep.append(child)
     treenode.children = childrentokeep
     return treenode
