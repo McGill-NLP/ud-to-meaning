@@ -103,12 +103,14 @@ def preprocess(sentence):
                         ),
                     'flat', "~"
                     ),
-                'compound'
+                'compound', "~"
                 ),
-            'goeswith'
+            'goeswith', "_"
             )
     deprels = set(token['deprel'] for token in flat)
     for rel in deprels:
-        if rel.startswith('compound') or rel.startswith('goeswith') or rel.startswith('flat'):
-            flat = flatten_relation_list(flat,rel)
+        if rel.startswith('compound') or rel.startswith('flat'):
+            flat = flatten_relation_list(flat,rel,"~")
+        elif  rel.startswith('goeswith'):
+            flat = flatten_relation_list(flat,rel,"_")
     return add_nulldeterminers(clean_lemmas(flat))
