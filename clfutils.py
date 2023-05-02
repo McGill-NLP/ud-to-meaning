@@ -148,14 +148,15 @@ def sbn_to_clf(sbnlines):
             predshort, synset = predlong.split('.')[0], '.'.join(predlong.split('.')[1:])
             clflines.append(f"{box} {predshort} \"{synset}\" {variable}")
 
-            relparts = [x for x in predicates.split(' ')[1:] if len(x)>0]
+            quotesplit = predicates.split('"')
+            relparts = [x for x in quotesplit[0].split(' ')[1:] if len(x)>0] + [x for x in quotesplit[1:] if len(x.strip()) > 0]
             relations_var = [(relparts[j],int(relparts[j+1])) for j in range(0,len(relparts)-1,2) if relparts[j+1][0] in ('+','-') and relparts[j+1][1:].isdigit()]
             relations_prop = [(relparts[j],(-1 if relparts[j+1].startswith('<') else 1)*int(relparts[j+1][1:])) for j in range(0,len(relparts)-1,2) if relparts[j+1][0] in ('<','>') and relparts[j+1][1:].isdigit()]
             relations_const = [(relparts[j],relparts[j+1]) for j in range(0,len(relparts)-1,2) if not (relparts[j+1][0] in ('+','-','<','>') and relparts[j+1][1:].isdigit())]
             relations_const = [(x,y[1:-1]) for x,y in relations_const if y.startswith('"') and y.endswith('"')] + [(x,y) for x,y in relations_const if not(y.startswith('"') and y.endswith('"'))] 
 
             clflines = clflines + [f"{box} {x} {variable} {variables[i+y][1]}" for x,y in relations_var]
-            clflines = clflines + [f"{box} {x} {variable} \"{y}\"" for x,y in relations_const]
+            clflines = clflines + [f"{box} {x} {variable} \"{y.lower().replace(' ','~')}\"" for x,y in relations_const]
             clflines = clflines + [f"{box} {x} {variable} {boxes[boxes.index(box)+y]}" for x,y in relations_prop]
         return clflines
     except Exception as e:
