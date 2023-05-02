@@ -101,6 +101,7 @@ def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None,default_sens
             myargs = build_counter_args(datapoint[0],
                                         datapoint[1],
                                         ill='score',
+                                        restarts=datapoint[2] if len(datapoint)>2 else 20,
                                         baseline=True,
                                         default_sense=default_sense,
                                         default_role=default_role)
@@ -144,7 +145,7 @@ def simplify_filepairs(filepairs,synset=False,box=False,theta=False):
                 nlines = f.write("\n".join(pmbclf))
             with open(pathprefix+"-simplified.clf","w") as f:
                 nlines = f.write("\n".join(computedclf))
-            outpairs.append([pathprefix+"-pmb-simplified.clf",pathprefix+"-simplified.clf","w"])
+            outpairs.append([pathprefix+"-pmb-simplified.clf",pathprefix+"-simplified.clf"] + pair[2:])
         return outpairs
 
 # Just pass it the input and output files to test, it will return all the results.
@@ -202,7 +203,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     with open(args.infile) as f:
         infileraw = f.read()
-    filepairs = [x.split('\t') for x in infileraw.split('\n')]
+    filepairs = [x.split('\t')+[20] for x in infileraw.split('\n')]
+    for x in filepairs:
+        x[2]=int(x[2])
     ans = evaluate_clfs(filepairs,nproc=args.nproc,scorelistfile=args.scorelistfile,logfilepfx=args.logfilepfx,remove=args.remove)
     with open(args.outfile, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=['Datapoint','Precision','Recall','FScore','LongResults'])
