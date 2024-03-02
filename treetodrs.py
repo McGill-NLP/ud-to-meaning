@@ -34,13 +34,21 @@ for x in rellines:
     else:
         relmeanings[x[0]].append((SemType.fromstring(x[1]),SdrtExpression.fromstring(x[2])))
 
-# This function takes a Token as input
-# and returns a new Token
-# identical to the first, but with denotations added
-# for both the word itself ("word_den") and its relation ("rel_den").
-# It adds no denotation to punctuation Tokens,
-# and adds a denotation based on one of the templates to any non-determiner word.
 def add_denotation(t):
+    '''
+    Takes a Token (from conllu class) as input
+    and returns a new Token
+    identical to the first, but with denotations added
+    for both the word itself ("word_den") and its relation ("rel_den").
+    It adds no denotation to punctuation Tokens,
+    and adds a denotation based on one of the templates to any non-determiner word.
+
+            Parameters:
+                    t (Token): The conllu-class Token to add the denotation to
+
+            Returns:
+                    t (Token): A new Token, just like the first, but with denotations added.
+    '''
     t = copy.deepcopy(t)
     if t['upos'] in poswithnoden:
         if t['deprel'] == 'root':
@@ -69,14 +77,20 @@ def add_denotation(t):
         logging.warning("The relation {} on the word {} with ID {} is a relation with unknown denotation.".format(t['deprel'], t['form'], str(t['id'])))
     return t
 
-# This function computes the conjunction (in an essentially Lasersohn way) of two lambda-expressions
-# den1 and den2 are two DRS lambda-expressions.
-# They must both have the same semantic type, which is semtype.
-# The function computes and returns their conjunction,
-# which has the same semantic type.
-# It won't work very well until we fix the DRS simplification code.
-# TODO this is broken now that there are new denotations for everything.
 def compute_conj(den1, den2, semtype):
+    '''
+    Computes the Lasersohnian conjunction of two lambda-expressions.
+    Slightly broken; only guaranteed to work on the semantic types I've explicitly written in.
+
+            Parameters:
+                    den1: A DRS lambda expression (from NLTK) to conjoin
+                    den2: Another DRS lambda expression (from NLTK) to conjoin
+                    semtype: The shared semantic type of these expressions
+
+            Returns:
+                    conjden: A DRT expression representing the conjunction of the two lambda expressions, also with type semtype.
+    '''
+    # TODO this is broken now that there are new denotations for everything.
     # There's a special proviso for semantic types ((et)t) and ((st)t)
     if semtype.like(SemType.fromstring('((ut)t)')):
         conjden = SdrtExpression.fromstring(r'\F\G\H.(([x],[])+H(x)+F((\y.([],[Sub(y,x)]))) + G((\y.([],[Sub(y,x)]))))')
@@ -99,6 +113,7 @@ def compute_conj(den1, den2, semtype):
     logging.warning(f"Not currently able to handle conjunctions of things of type {semtype}")
     # Now we (attempt to) deal with types that are functions from somewhere to somewhere else.
     # It will involve heavy use of new variables.
+    # This portion might be have bugs currently.
     lefttype = semtype.get_left()
     if lefttype.is_atomic() and lefttype != SemType.fromstring('t'):
         a = DrtVariableExpression(unique_variable())
@@ -115,22 +130,26 @@ def compute_conj(den1, den2, semtype):
         recursivecallstr = str(compute_conj(den1(x).simplify(),den2(x).simplify(),semtype.get_right()))
         return SdrtExpression.fromstring(rf'\{xstr}.{recursivecallstr}').simplify()
 
-# This function takes four inputs:
-# start is any type of thing, but usually a SemType
-# end is any type of thing, but usually a SemType
-# iopairs is a list of tuples of things of the same type as start and end
-# comp_func is an optional argument. It is a function that takes two things of the types of start and end,
-#             and returns a boolean which should be taken to express whether those are equal.
-# The function returns a list of lists;
-# each list in the returned list contains an ordering of the numbers 0 through len(iopairs)-1
-# such that if you order iopairs in this order,
-# then the first iopair's first component is start,
-# the last iopair's second component is end,
-# and otherwise each iopair's second component is the next iopair's first component.
-# Like a valid Domino train.
-# The function finds all possible such orderings (which might be 0) through depth-first search.
-# This is used to find a correct order of composition for a Token's dependents.
 def semtypebinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
+    '''
+    The function returns a list of lists;
+    each list in the returned list contains an ordering of the numbers 0 through len(iopairs)-1
+    such that if you order iopairs in this order,
+    then the first iopair's first component is start,
+    the last iopair's second component is end,
+    and otherwise each iopair's second component is the next iopair's first component.
+    Like a valid Domino train.
+    The function finds all possible such orderings (which might be 0) through depth-first search.
+    This is used to find a correct order of composition for a Token's dependents.
+
+            Parameters:
+                    start: any type of thing, but usually a SemType
+                    end: any type of thing, but usually a SemType
+                    iopairs: a list of tuples of things of the same type as start and end
+                    comp_func: optional. A function that takes two things of the types of start and end, and returns a boolean which should be taken to express whether those are equal.
+            Returns:
+                    binarizations: A list of lists representing the valid orderings of iopairs.
+    '''
     binarizations = []
     if len(iopairs)==1:
         if comp_func(iopairs[0][0],start) and comp_func(iopairs[0][1],end):
@@ -147,23 +166,26 @@ def semtypebinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
                     binarizations.append([i]+tail)
     return binarizations
 
-# This function takes four inputs:
-# start is any type of thing, but usually a SemType
-# end is any type of thing, but usually a SemType
-# iopairs is a list of lists of tuples of things of the same type as start and end
-# comp_func is an optional argument. It is a function that takes two things of the types of start and end,
-#             and returns a boolean which should be taken to express whether those are equal.
-# The function returns a list of lists;
-# each list in the returned list contains 2-uples.
-# Their first elements of the 2-uples give an ordering of the numbers 0 through len(iopairs)-1
-# by the same principles as semtypebinarizations.
-# But now we are giving it an option of one of several iopairs for each ordering-element
-# (like dominos with multiple faces)
-# so the second elements of the 2-uples tell which element of iopairs is chosen for that domino.
-# This is used to find a correct order of composition for a Token's dependents,
-# when multiple semantic types are possible
-# TODO this is unfortunately very slow now
 def multidominobinarizations(start, end, iopairs, comp_func = lambda x, y: x==y):
+    '''
+    The function returns a list of lists;
+    each list in the returned list contains 2-uples.
+    Their first elements of the 2-uples give an ordering of the numbers 0 through len(iopairs)-1
+    by the same principles as semtypebinarizations.
+    But now we are giving it an option of one of several iopairs for each ordering-element
+    (like dominos with multiple faces)
+    so the second elements of the 2-uples tell which element of iopairs is chosen for that domino.
+    This is used to find a correct order of composition for a Token's dependents,
+    when multiple semantic types are possible.
+
+            Parameters:
+                    start: any type of thing, but usually a SemType
+                    end: any type of thing, but usually a SemType
+                    iopairs: a list of lists of tuples of things of the same type as start and end
+                    comp_func: optional. A function that takes two things of the types of start and end, and returns a boolean which should be taken to express whether those are equal.
+            Returns:
+                    binarizations: A list of lists representing the valid orderings of iopairs, with each ordering also telling you which "domino face" to use for each iopair.
+    '''
     binarizations = []
     if len(iopairs)==1:
         for k in range(len(iopairs[0])):
@@ -182,22 +204,30 @@ def multidominobinarizations(start, end, iopairs, comp_func = lambda x, y: x==y)
                         binarizations.append([(m,k)]+tail)
     return binarizations
  
-# This function take a TokenTree as input,
-# and returns a new TokenTree with no children
-# It traverses the tree depth-first,
-# and for each node's children, uses the binarization code
-# to decide how best to compose the children with the node.
-# Then, it uses a computed valid binarization to combine all the children into the node.
-# It repeats until it finishes with the root, which it treats specially,
-# because "root" relation has no head.
-# If all the nodes in a TokenTree have been correctly typed and given denotations,
-# applying simplifynodetyped to the root should give a correct denotation for the sentence
-# in the "word_dens" field of the resulting TokenTree.
-# If withtrace is True, then the denotations returned will have 3 components,
-# with the third a dictionary
-# containing "children" (a list of children in binarization order)
-# and "original" (the original denotation of the node)
 def simplifynodetyped(treenode, withtrace=False):
+    '''
+    This function take a TokenTree as input,
+    and returns a new TokenTree with no children
+    It traverses the tree depth-first,
+    and for each node's children, uses the binarization code
+    to decide how best to compose the children with the node.
+    Then, it uses a computed valid binarization to combine all the children into the node.
+    It repeats until it finishes with the root, which it treats specially,
+    because "root" relation has no head.
+    If all the nodes in a TokenTree have been correctly typed and given denotations,
+    applying simplifynodetyped to the root should give a correct denotation for the sentence
+    in the "word_dens" field of the resulting TokenTree.
+    If withtrace is True, then the denotations returned will have 3 components,
+    with the third a dictionary
+    containing "children" (a list of children in binarization order)
+    and "original" (the original denotation of the node)
+
+            Parameters:
+                    treenode: A node from a Tree representation of a conllu TokenList
+                    withtrace: Whether to return a list of denotations with a trace allowing you to replay the computation process
+            Returns:
+                    treenode: A node, though of as having no children, whose "word_dens" field contains all the possible denotations computed for the sentence.
+    '''
     # Ignore nodes whose types we don't know.
     treenode = copy.deepcopy(treenode)
     if ('rel_dens' not in treenode.token.keys()) or ('word_dens' not in treenode.token.keys()):
@@ -220,9 +250,6 @@ def simplifynodetyped(treenode, withtrace=False):
     binarizations = multidominobinarizations(SemType(),SemType(),iopairs,comp_func = lambda x,y:x.like(y))
     # Binarizations tell you which dependents to combine first.
     if binarizations:
-        # TODO currently this leaves me with too many binarizations,
-        # which are not genuinely different.
-        # Need a way to tell whether two computed denotations are really different.
         nodedens = []
         for binarization in binarizations:
             nodeden = treenode.token['word_dens'][binarization[0][1]]
@@ -291,17 +318,36 @@ def simplifynodetyped(treenode, withtrace=False):
                                                     if relden[0].get_right().get_left().like(wordden[0])]
     return treenode
 
-# pass in a raw conllu or tokenlist
-# and get all of the denotations (or traces) computed for it
 def getalldens(tokenlist, withtrace = False):
+    '''
+    Turn a raw TokenList (from conllu package) into a list of all of the denotations computed for it.
+
+            Parameters:
+                    tokenlist: The TokenList representing the sentence to compute denotations for.
+                    withtrace: If True, the list returned is a list of denotations, types, and traces. If False, the traces are left out.
+
+            Returns:
+                    dens: The list of denotations computed. Each denotation is a tuple of a DRTExpression, type, and potentially a trace.
+    '''
     withdens = conllu.TokenList([add_denotation(token) for token in tokenlist])
     simplified = simplifynodetyped(withdens.to_tree(), withtrace)
     return simplified.token['word_dens'] if 'word_dens' in simplified.token.keys() else []
 
-# Turn a trace (as returned by simplifynodetyped) into a GraphViz directed graph
-# which can then be viewed, or styled, or whatever as desired.
-# The arguments counter, graph, and parentname are mainly for use within the recursive function calls.
 def tracetogvtree(t, counter = 0, graph = None, parentname = None):
+    '''
+    Turn a trace (as returned by simplifynodetyped) into a GraphViz directed graph
+    which can then be viewed, or styled, or whatever as desired.
+
+            Parameters:
+                    t: A trace (as returned by simplifynodetyped)
+                    counter: During recursive function calls, a counter to prevent nodes being assigned the same name.
+                    graph: During recursive function calls, the parent graph.
+                    parentname: During recursive function calls, the node name of the parent of the current node.
+
+            Returns:
+                    graph: a GraphViz directed graph representing the trace.
+                    counter: During recursive function calls, a counter to prevent nodes being assigned the same name.
+    '''
     if graph is None:
         graph = graphviz.Digraph(node_attr={'shape': 'box','fontname':'Courier New'}, edge_attr={'dir':'back'})
     topname = str(counter)
@@ -332,8 +378,17 @@ def tracetogvtree(t, counter = 0, graph = None, parentname = None):
     else:
         return graph
 
-# Get a list of the semantic types assigned to each relation and word in computing a trace.
+
 def tracetosemtypes(trace):
+    '''
+    # Get a list of the semantic types assigned to each relation and word in computing a trace.
+
+            Parameters:
+                    trace: A trace (as returned by simplifynodetyped) to convert.
+
+            Returns:
+                    lines: A list of strings representing pairs of one token or relation and the type assigned to it in that trace.
+    '''
     if len(trace)==2:
         return []
     lines = []

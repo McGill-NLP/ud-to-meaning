@@ -10,11 +10,23 @@ pmbverbnetroles = ["Agent","Asset","Attribute","Beneficiary","Causer","Co-Agent"
 pmbverbnetroles = pmbverbnetroles + [x+"Of" for x in pmbverbnetroles]
 
 
-# Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
+# 
 # It takes as input a condition from the DRT module, the name of the projective DRS it belongs to,
 # and a counter saying what names are still available for future DRS boxes.
 # It returns a list of clauses and an updated counter.
 def process_cond(cond, mydrsname, counter):
+    '''
+    Helps in converting NLTK DRS data structures to lists of clauses for CLF format.
+
+            Parameters:
+                    cond: A condition from the DRT module; part of a DRS.
+                    mydrsname: A string name that has been assigned higher to the projective DRS that cond is in.
+                    counter: A number counting how many names have been assigned, to prevent clashes.
+
+            Returns:
+                    clflines: A list of strings, with each a line in a CLF encoding of the condition.
+                    counter: The counter that counts how many names have been assigned, so other functions can use it to give boxes unique names.
+    '''
     if isinstance(cond,SdrtBoxRelationExpression):
         rel = cond.relation
         embdrs = cond.drs
@@ -85,13 +97,18 @@ def process_cond(cond, mydrsname, counter):
     else:
         return [], counter
 
-# Converting NLTK DRS data structures to lists of clauses for CLF format.
-# It takes as input a DRS from the DRT module,
-# and a counter saying what names are still available for future DRS boxes.
-# It returns a list of clauses.
-# If it is being recursively called (or is called with a high counter number)
-# it also returns an updated counter
 def drs_to_clf(drs, counter=0):
+    '''
+    Converting NLTK DRS data structures to lists of clauses for CLF format.
+
+            Parameters:
+                    drs: a DRS from the DRT module.
+                    counter: How many names have been assigned, so we don't assign too many duplicates.
+
+            Returns:
+                    clflines: A list of strings, with each a line in a CLF encoding of the DRS.
+                    counter: The counter that counts how many names have been assigned, so other functions can use it.
+    '''
     if not isinstance(drs,DRS):
         return [] if counter==0 else ([],counter)
     istop = counter==0
@@ -108,11 +125,28 @@ def drs_to_clf(drs, counter=0):
     return clflines, counter
 
 def drses_to_clf(drslist):
+    '''
+    Converting a list of NLTK DRS data structures to a list of lists of clauses for CLF format.
+
+            Parameters:
+                    drslist: a list of DRSes from the DRT module.
+
+            Returns:
+                    clflineses: A list of lists of strings representing the DRSes in CLF format.
+    '''
     clflineses = [drs_to_clf(x) for x in drslist if isinstance(x,DRS)]
     return clflineses
 
-# Converting Simplified Box Notation to CLF format.
 def sbn_to_clf(sbnlines):
+    '''
+    Converting Simplified Box Notation to CLF format.
+
+            Parameters:
+                    sbnlines: A list of strings representing the DRS in SBN format.
+
+            Returns:
+                    clflines: A list of strings, with each a line in a CLF encoding of the DRS.
+    '''
     try:
         currentindex = 0
         currentbox = f'b{currentindex}'
@@ -141,7 +175,6 @@ def sbn_to_clf(sbnlines):
                 otherboxind = i + ((-1 if (argpos.startswith('<') or argpos.startswith('-')) else 1)*int(argpos[1:]))
                 otherbox = boxrels[otherboxind][0]
                 clflines.append(f"{otherbox} {rel} {box}")
-        # describe.v.01               Proposition <1
         for i in range(len(variables)):
             box, variable, predicates = variables[i]
             predlong = predicates.split(' ')[0]
@@ -163,6 +196,15 @@ def sbn_to_clf(sbnlines):
         return []
 
 def remove_boxrels(clflines):
+    '''
+    Removes discourse relations between boxes from a DRS in CLF format.
+
+            Parameters:
+                    clflines: A list of strings representing lines in a CLF representation of a DRS
+
+            Returns:
+                    clflines: A list of strings representing lines in the box-less CLF representation.
+    '''
     clflinespctsplit = [x.split("%") for x in clflines]
     clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
     # Remove box-level relations.
@@ -174,6 +216,15 @@ def remove_boxrels(clflines):
     return(['%'.join([' '.join(line[0])+(' ' if line[1] else '')] + line[1]) for line in clflinestokens])
 
 def remove_thetaroles(clflines):
+    '''
+    Removes argument roles labels from a DRS in CLF format.
+
+            Parameters:
+                    clflines: A list of strings representing lines in a CLF representation of a DRS
+
+            Returns:
+                    clflines: A list of strings representing lines in the theta-role-less CLF representation.
+    '''
     clflinespctsplit = [x.split("%") for x in clflines]
     clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
     for x,_ in clflinestokens:
@@ -182,6 +233,15 @@ def remove_thetaroles(clflines):
     return(['%'.join([' '.join(line[0])+(' ' if line[1] else '')] + line[1]) for line in clflinestokens])
 
 def remove_synsets(clflines):
+    '''
+    Removes WordNet synset tags from a DRS in CLF format.
+
+            Parameters:
+                    clflines: A list of strings representing lines in a CLF representation of a DRS
+
+            Returns:
+                    clflines: A list of strings representing lines in the synset-less CLF representation.
+    '''
     clflinespctsplit = [x.split("%") for x in clflines]
     clflinestokens = [(x[0].split(),x[1:]) for x in clflinespctsplit]
     for x,_ in clflinestokens:
@@ -192,6 +252,15 @@ def remove_synsets(clflines):
 # This takes list of the lines from a clause format CLF file (the type available in PMB data)
 # and outputs a DRS of the class from the DRT module.
 def clf_to_drs(clflines):
+    '''
+    Converting a list of clauses representing a DRS in CLF format to NLTK DRS data structures.
+
+            Parameters:
+                    clflines: A list of strings, with each a line in a CLF encoding of the DRS.
+
+            Returns:
+                    drs: a DRS from the DRT module.
+    '''
     clflinesstripped = [x.split("%")[0].strip() for x in clflines]
     contentlines = [x for x in clflinesstripped if len(x) > 0]
     pointedlines = {}
@@ -257,8 +326,17 @@ def clf_to_drs(clflines):
         finaldrs = finaldrs + pointedboxes[pointer]
     return DrtExpression.fromstring(str(finaldrs.simplify()))
 
-# Recursively removes any conditions that have a particular variable in them.
 def remove_conds_with_var(conds,var):
+    '''
+    Recursively removes any conditions that have a particular variable in them.
+
+            Parameters:
+                    conds: A list of the conditions (from NLTK DRS module) to be dealt with
+                    var: A variable (from NLTK DRS module) to remove
+
+            Returns:
+                    newconds: Only those conditions from the input list not containing that variable.
+    '''
     newconds = []
     for cond in conds:
         if isinstance(cond,DrtProposition):
@@ -269,8 +347,16 @@ def remove_conds_with_var(conds,var):
             newconds.append(cond)
     return newconds
 
-# Converting CLF format to Simplified Box Notation.
 def clf_to_sbn(clflines):
+    '''
+    Converting CLF format to Simplified Box Notation.
+
+            Parameters:
+                    clflines: A list of strings, with each a line in a CLF encoding of the DRS.
+
+            Returns:
+                    sbnlines: A list of strings representing the DRS in SBN format.
+    '''
     clflinesstripped = [x.split("%")[0].strip() for x in clflines]
     contentlines = [x for x in clflinesstripped if len(x) > 0]
     clflinessplit = [x.split() for x in contentlines]
@@ -313,16 +399,6 @@ def clf_to_sbn(clflines):
                 symbol=">"
             sbnlines.append(f"          {introline[1]} {symbol}{relativeindex}")
         boxlines = [x for x in clflinessplit if x[0]==boxes[i]]
-        #if not boxintroductions:
-        #    for line in boxlines:
-        #        if len(line)>=4 and line[2] in variables and line[3] in boxes:
-        #                relativeindex = boxes.index(line[3]) - i
-        #                if relativeindex<0:
-        #                    symbol="<"
-        #                    relativeindex = -relativeindex
-        #                else:
-        #                    symbol=">"
-        #                sbnlines.append(f"          SOURCE {symbol}{relativeindex}")
         boxvars = [x[2] for x in boxlines if len(x) > 1 and x[1] == "REF"]
         # then all of its variables and their facts
         for var in boxvars:

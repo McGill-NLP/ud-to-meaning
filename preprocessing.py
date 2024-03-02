@@ -6,16 +6,23 @@ tokensubs = []
 with open("tokensubs.csv") as f:
     tokensubs = [x.split() for x in f.read().split('\n') if '\t' in x]
 
-# This function is a hack,
-# but it changes any "flat" dependency relations
-# with head a NOUN and dependent a PROPN
-# into "nmod"...
-# or into "flat" dependent on a previous PROPN
-# if there are multiple on the same NOUN
-# ... it just makes the denotations come out nicer.
-# It takes a TokenList as input,
-# and returns a new TokenList with the change.
 def switch_propnflattonmod(sentence):
+    '''
+    This function is a hack,
+    but it changes any "flat" dependency relations
+    with head a NOUN and dependent a PROPN
+    into "nmod"...
+    or into "flat" dependent on a previous PROPN
+    if there are multiple on the same NOUN
+    ... it just makes the denotations come out nicer.
+    It takes a TokenList as input,
+    and returns a new TokenList with the change.
+    
+            Parameters:
+                    sentence: A TokenList representing the sentence to preprocess.
+            Returns:
+                    postprocessed: A TokenList representing the modified sentence.
+    '''
     sentence = copy.deepcopy(sentence)
     seenheads = {}
     for token in sentence:
@@ -29,14 +36,19 @@ def switch_propnflattonmod(sentence):
                     token['upos'] = 'PROPN-MOD'
     return conllu.TokenList(sentence)
 
-# This function takes a TokenList as input
-# and returns a new TokenList,
-# very similar to the first,
-# but with null definite determiners inserted just before proper nouns without existing determiners,
-# and null indefinite determiners inserted just before common nouns without existing determiners.
-# Because of a hack involving the "flat" relation,
-# no determiner is inserted if the noun is related to its head with the "amod" relation.
 def add_nulldeterminers(sentence):
+    '''
+    Takes a TokenList as input and returns a new TokenList, very similar to the first,
+    but with null definite determiners inserted just before proper nouns without existing determiners,
+    and null indefinite determiners inserted just before common nouns without existing determiners.
+    Because of a hack involving the "flat" relation,
+    no determiner is inserted if the noun is related to its head with the "amod" relation.
+    
+            Parameters:
+                    sentence: A TokenList representing the sentence to preprocess.
+            Returns:
+                    postprocessed: A TokenList representing the modified sentence.
+    '''
     determinered = [sentence.filter(id=token['head'])[0] for token in sentence
                         if (token['upos']=='DET' and token['deprel'].startswith('det'))]
     determinerless = [token for token in sentence
@@ -58,10 +70,17 @@ def add_nulldeterminers(sentence):
     sentence = conllu.TokenList(sorted(sentence,key=lambda x:x['id']))
     return reindex_tokenlist(sentence)
 
-# This takes a sentence and removes characters from the lemmas and features
-# that will not play well with later derivation.
-# It is meant to undone by a step in postprocessing.
 def clean_lemmas(sentence):
+    '''
+    This takes a sentence and removes characters from the lemmas and features
+    that will not play well with later derivation.
+    It is meant to undone by a step in postprocessing.
+    
+            Parameters:
+                    sentence: A TokenList representing the sentence to preprocess.
+            Returns:
+                    postprocessed: A TokenList representing the modified sentence.
+    '''
     sentence = copy.deepcopy(sentence)
     for token in sentence:
         token['lemma'] = token['lemma'].lower()
@@ -80,17 +99,31 @@ def clean_lemmas(sentence):
 
 # Remove multi-token tokens
 def remove_multitokens(sentence):
+    '''
+    Removes tokens that span multiple rows in the conllu.
+
+            Parameters:
+                    sentence: A TokenList representing the sentence to preprocess.
+            Returns:
+                    postprocessed: A TokenList representing the modified sentence.
+    '''
     sentence = [x for x in sentence if isinstance(x['id'],int)]
     sentence = conllu.TokenList(sentence)
     return reindex_tokenlist(sentence)
 
-# This combines all the previous steps in the correct order.
-# So, it changes flat relations between Nouns and Proper Nouns to "amod" relations (for semantic reasons),
-# flattens remaining "flat" relations,
-# flattens remaining "compound" relations,
-# and adds null determiners to any determiner-less nouns and proper nouns (except those modified by "amod"),
-# returning a new TokenList
 def preprocess(sentence):
+    '''
+    A combined function for all of the preprocessing steps.
+    it changes flat relations between Nouns and Proper Nouns to "amod" relations (for semantic reasons),
+    flattens remaining "flat" relations,
+    flattens remaining "compound" relations,
+    and adds null determiners to any determiner-less nouns and proper nouns (except those modified by "amod").
+
+            Parameters:
+                    sentence: A TokenList representing the sentence to preprocess.
+            Returns:
+                    postprocessed: A TokenList representing the modified sentence.
+    '''
     flat = flatten_relation_list(
                 flatten_relation_list(
                     flatten_relation_list(

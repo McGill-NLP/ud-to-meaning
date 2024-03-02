@@ -1,5 +1,16 @@
 
 class SemType:
+    """
+    A class representing a semantic type. It can be an AtomicType or a CompositeType,
+    or a BlankType.
+    
+    Methods:
+        is_atomic: Is this an atomic type?
+        is_blank: Is this a blank type (i.e. fully wildcard)?
+        is_composite: Is this a composite type?
+        like(other): This is a more relaxed version of equality. Some semantic types are similar shapes but for substitution of an e for a sub-type of e, or a blank (?) for another type. This type of comparison treats those substitutions as vacuous.
+        fromstring: Semantic Types can (and should) be constructed from strings consisting of letters representing basic types (e, s, t, j, i, o), blank types (?), and brackets stating how to pair these.
+    """
     def __init__(self):
         self.atomic = None
         self.blank = None
@@ -56,7 +67,14 @@ class SemType:
                 raise ValueError("{} is not a string corresponding to a SemType (no parentheses surrounding).".format(string))
 
 class AtomicType(SemType):
-    basictypes = ['e','s','t','j','b','i'] # j = subject, b = object, i = indirect object # TODO clean later
+    """
+    A sub-type of SemType, this type represents a single individual or event.
+    
+    Methods:
+        like(other): An AtomicType is "like" another AtomicType if they are the same, if one of them is 'u' (unspecified atomic) or '?' (blank), or if one is 'e' and the other is a sub-type of 'e' ('j','i','o')
+        get_content(): Returns a string representing the actual specific type this represents. 'e','s','t','j','b','i', or 'u'
+    """
+    basictypes = ['e','s','t','j','b','i'] # j = subject, b = object, i = indirect object
     unspecifiedatomic = 'u' # this is "like" any other atomic type
     hierarchy = {'e':['j','b','i']} # any of these lower ones are "like" type e
 
@@ -87,7 +105,7 @@ class AtomicType(SemType):
         return self.content
     
     def like(self,other):
-        if isinstance(other, self.__class__): # TODO maybe add support for multi-level hierarchy?
+        if isinstance(other, self.__class__):
             if (self.get_content() == AtomicType.unspecifiedatomic or
                         other.get_content() == AtomicType.unspecifiedatomic or
                         self.get_content() == other.get_content()):
@@ -105,6 +123,16 @@ class AtomicType(SemType):
         return self.get_content()
 
 class CompositeType(SemType):
+    """
+    A sub-type of SemType, this type represents an ordered pair of two other types.
+    
+    Methods:
+        like(other): An AtomicType is "like" another AtomicType if they are the same, if one of them is 'u' (unspecified atomic) or '?' (blank), or if one is 'e' and the other is a sub-type of 'e' ('j','i','o')
+        get_left: Returns the first element of the ordered pair - another SemType.
+        get_right: Returns the second element of the ordered pair - another SemType.
+        uncurried_signature: If we peel apart all of the layers of functions-returning-functions-returning-functions until the right-hand side is just atomic, we get a list of types to feed into the left-hand side, then the atomic type that finally comes out the right.
+        tuple_shaped_str: Alternative string representation as several inputs going to one output, like "(e,s,s) -> t".
+    """
     def __init__(self,left,right):
         SemType.__init__(self)
         if not isinstance(left, SemType):
@@ -159,6 +187,13 @@ class CompositeType(SemType):
 
 # this is "like" any other type but only equal to other BlankTypes.
 class BlankType(SemType):
+    """
+    A sub-type of SemType, this type represents a wildcard - could be any type.
+    
+    Methods:
+        like(other): An BlankType is "like" any other type.
+    """
+
     def __init__(self):
         self.atomic = False
         self.blank = True

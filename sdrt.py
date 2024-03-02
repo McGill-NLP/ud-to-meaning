@@ -1,12 +1,11 @@
 # Natural Language Toolkit: Discourse Representation Theory (DRT)
 #
 # Author: Dan Garrette <dhgarrette@gmail.com>
+# Edited by Laurestine Bradford for SDRT for PMB.
 #
 # Copyright (C) 2001-2022 NLTK Project
 # URL: <https://www.nltk.org/>
 # For license information, see LICENSE.TXT
-#
-# Edited by Laurestine Bradford for SDRT for PMB.
 
 from functools import reduce
 
