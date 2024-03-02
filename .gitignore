@@ -1,18 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
-# PMB for testing
-pmbmini
-pmb-gold-english
-
-# Personal scribbling file
-scratch work
-sketchnotes.txt
-
-# imported DRS parsing folder and ud-boxer
-DRS_parsing
-ud_boxer
-
-# results
-results
+# logs
 *.log
