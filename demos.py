@@ -1,7 +1,6 @@
 import os
 import stanza # parsing to UD
 import conllu # for reading conllu files
-#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 import conlluutils
 import preprocessing
 import postprocessing

@@ -1,7 +1,5 @@
 import conllu # reading ConLL-U files
 import copy # deep-copying Tokens and and TokenLists
-#import os
-#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
 from conlluutils import *
 
 tokensubs = []

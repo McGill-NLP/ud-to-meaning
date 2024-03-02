@@ -1,14 +1,9 @@
-#from nltk.inference import TableauProver # helps resolve anaphora
 from nltk.sem.drt import * # all the DRT things
 from nltk.sem.logic import unique_variable # helps for manipulating DRT expressions
 import graphviz # for displaying traces nicely
 import conllu # reading ConLL-U files
-#import os # changing working directory
 import copy # deep-copying Tokens and and TokenLists
 import logging
-# whatever the working directory is! on my computer it is this.
-#os.chdir('C:\\Users\\Lola\\OneDrive\\UDepLambda\\computer code')
-# the local modules and files should be in the working directory now
 from semtypes import *
 from conlluutils import *
 from preprocessing import *

@@ -1,4 +1,3 @@
-#import re # need this to get SemTypes from strings
 
 class SemType:
     def __init__(self):
