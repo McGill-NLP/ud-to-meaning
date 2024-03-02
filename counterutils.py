@@ -88,6 +88,8 @@ def build_counter_args(f1, f2,
     return args
 
 # TODO might be more elegant to use Pools in the future.
+# Wrapper function for whatever we want one process to do while it's evaluating all of the .clf files
+# (Helps with threading.)
 def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None,default_sense=False,default_role=False):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG)
@@ -112,12 +114,15 @@ def evaluate_clf_proc(queue,list,scorelistfile=None,logfilepfx=None,default_sens
             except ValueError:
                 logging.warning(f"Did not find output for datapoint {datapoint[0]}, using NA.")
                 scores = [(('NA','NA','NA'),'NA')]
-            # get the best score to write down - we're doing oracle accuracy.
+            # get the best score to write down - oracle accuracy.
             bestscore = max(scores,key=lambda x:x[0][2])
             list.append({'Datapoint':datapoint[1],'Recall':bestscore[0][0],'Precision':bestscore[0][1],'FScore':bestscore[0][2],'LongResults':bestscore[1]})
         except EmptyException:
             return
 
+# This applies some of the structural simplifications we considered (to make more fair comparisons)
+# to a bunch of .clf files at once, based on the submitted filepairs.
+# Other arguments say what to simplify away.
 def simplify_filepairs(filepairs,synset=False,box=False,theta=False):
     if not (synset or box or theta):
         return []
@@ -146,6 +151,12 @@ def simplify_filepairs(filepairs,synset=False,box=False,theta=False):
         return outpairs
 
 # Just pass it the input and output files to test, it will return all the results.
+# Filepairs is a list of lists or a list of tuples. Each list or tuple inside is two .clf files
+# that we would like to compare using Counter.
+# Allows for multithreading with nproc being the number of processes.
+# scorelistfile is for if we would like more than just the best scores.
+# logfilepfx is for logging, so that all subprocess logs can have a common start of filename.
+# if remove is "box" then we will remove DRS box information before comparing.
 def evaluate_clfs(filepairs, nproc=8, scorelistfile=None, logfilepfx = None,remove=None):
     if logfilepfx is not None:
         logging.basicConfig(filename=logfilepfx+".log", encoding='utf-8', level=logging.DEBUG,force=True)
